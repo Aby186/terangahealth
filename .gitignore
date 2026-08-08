@@ -1,0 +1,6 @@
+terangahealth-backend/vendor/
+terangahealth-backend/.env
+terangahealth-backend/storage/logs/
+terangahealth-frontend/node_modules/
+terangahealth-frontend/.angular/
+terangahealth-frontend/dist/
