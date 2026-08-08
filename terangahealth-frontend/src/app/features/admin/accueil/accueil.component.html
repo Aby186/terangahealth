@@ -1,0 +1,68 @@
+<div class="accueil">
+  <div class="banner">
+    <h2>Dashboard - Administrateur</h2>
+    <p>Bienvenue {{ nomComplet() }}</p>
+  </div>
+
+  <h3 class="section-title">Fonctionnalités Disponibles</h3>
+
+  <div class="cards-fonctionnalites">
+    <a routerLink="/admin/utilisateurs" class="carte-fonction">
+      <div class="icone bleu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3" /><circle cx="16.5" cy="9" r="2.3" /><path d="M2.5 20c0-3.3 2.7-6 6-6h1c1 0 2 .2 2.8.7" /><path d="M14.5 20c.3-2.8 2.1-5 4.8-5 1.9 0 3.4.9 4.2 2.4" /></svg>
+      </div>
+      <div class="carte-fonction-content">
+        <strong>Gestion Utilisateurs</strong>
+        <span>Créer, modifier, bloquer des comptes</span>
+      </div>
+    </a>
+
+    <a routerLink="/admin/services" class="carte-fonction">
+      <div class="icone teal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.3L22 9l-5 5 1.3 7.2L12 17.8 5.7 21.2 7 14 2 9l7.1-.7z" /></svg>
+      </div>
+      <div class="carte-fonction-content">
+        <strong>Gestion Services</strong>
+        <span>Créer, modifier les spécialités</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="cards-stats">
+    <div class="carte-stat">
+      <a routerLink="/admin/utilisateurs" class="tag tag-bleu">Voir</a>
+      <div class="icone-stat bleu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3" /><circle cx="16.5" cy="9" r="2.3" /><path d="M2.5 20c0-3.3 2.7-6 6-6h1c1 0 2 .2 2.8.7" /><path d="M14.5 20c.3-2.8 2.1-5 4.8-5 1.9 0 3.4.9 4.2 2.4" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalUtilisateurs() }}</div>
+      <div class="libelle">Total Utilisateurs</div>
+    </div>
+
+    <div class="carte-stat">
+      <a routerLink="/admin/utilisateurs" class="tag tag-vert">Voir</a>
+      <div class="icone-stat vert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.3L22 9l-5 5 1.3 7.2L12 17.8 5.7 21.2 7 14 2 9l7.1-.7z" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalMedecins() }}</div>
+      <div class="libelle">Médecins</div>
+    </div>
+
+    <div class="carte-stat">
+      <a routerLink="/admin/utilisateurs" class="tag tag-orange">Voir</a>
+      <div class="icone-stat orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalPatients() }}</div>
+      <div class="libelle">Patients</div>
+    </div>
+
+    <div class="carte-stat">
+      <a routerLink="/admin/services" class="tag tag-bleu">Voir</a>
+      <div class="icone-stat bleu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalServices() }}</div>
+      <div class="libelle">Services</div>
+    </div>
+  </div>
+</div>

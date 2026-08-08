@@ -1,0 +1,155 @@
+<div class="page">
+
+  <div class="page-header-box">
+    <div>
+      <h1>Visualiser mon planning</h1>
+      <p>Consultez et complétez vos créneaux de disponibilité.</p>
+    </div>
+    <button class="btn-ajouter" (click)="ouvrirAjout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+      Ajouter un créneau
+    </button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+  @if (successMessage()) {
+    <div class="success-box">{{ successMessage() }}</div>
+  }
+
+  <div class="calendar-toolbar">
+    <div class="toolbar-left">
+      @if (vueMode() === 'semaine') {
+        <div class="week-nav">
+          <button class="nav-btn" (click)="semainePrecedente()" aria-label="Semaine précédente">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <span class="week-label">{{ libelleSemaine() }}</span>
+          <button class="nav-btn" (click)="semaineSuivante()" aria-label="Semaine suivante">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </div>
+      } @else {
+        <div class="week-nav">
+          <button class="nav-btn" (click)="moisPrecedent()" aria-label="Mois précédent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <span class="week-label capitalize">{{ libelleMois() }}</span>
+          <button class="nav-btn" (click)="moisSuivant()" aria-label="Mois suivant">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" /></svg>
+          </button>
+        </div>
+      }
+      <button class="btn-today" (click)="aujourdhui()">Aujourd'hui</button>
+    </div>
+
+    <div class="toolbar-right">
+      <div class="view-toggle">
+        <button class="toggle-btn" [class.active]="vueMode() === 'semaine'" (click)="changerVue('semaine')">Semaine</button>
+        <button class="toggle-btn" [class.active]="vueMode() === 'mois'" (click)="changerVue('mois')">Mois</button>
+      </div>
+     <button class="icon-action" (click)="exporter()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" /></svg>
+        Exporter
+      </button>
+      <button class="icon-action" (click)="imprimer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="9" width="12" height="7" /><path d="M6 9V4h12v5M6 16v4h12v-4" /></svg>
+        Imprimer
+      </button>
+    </div>
+  </div>
+
+  @if (ajoutOuvert()) {
+    <div class="ajout-box">
+      <div class="ajout-row">
+        <div class="ajout-field">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="ajoutDate" />
+        </div>
+        <div class="ajout-field">
+          <label>Heure</label>
+          <input type="time" [(ngModel)]="ajoutHeure" />
+        </div>
+        <div class="ajout-field">
+          <label>Durée (min)</label>
+          <input type="number" [(ngModel)]="ajoutDuree" min="5" max="120" step="5" />
+        </div>
+      </div>
+      <div class="ajout-actions">
+        <button class="btn-annuler-ajout" (click)="fermerAjout()">Annuler</button>
+        <button class="btn-confirmer-ajout" [disabled]="!ajoutDate() || ajoutEnCours()" (click)="confirmerAjout()">
+          {{ ajoutEnCours() ? 'Ajout...' : 'Ajouter le créneau' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="state-message">Chargement de votre planning...</div>
+  }
+
+  @if (!loading() && vueMode() === 'semaine') {
+    <div class="calendar-wrapper">
+      <div class="calendar-grid" [style.grid-template-columns]="'70px repeat(' + jours.length + ', 1fr)'">
+
+        <div class="corner-cell"></div>
+        @for (jour of joursDeLaSemaine(); track $index) {
+          <div class="day-header">
+            <span class="day-name">{{ jours[$index] }}</span>
+            <span class="day-date">{{ jour.getDate() }}</span>
+          </div>
+        }
+
+        @for (heure of heures; track heure) {
+          <div class="hour-label">{{ heure }}</div>
+          @for (jour of joursDeLaSemaine(); track $index) {
+            @let c = cellule(jour, heure);
+            <div class="cal-cell" [class]="c.status ? 'status-' + c.status : 'vide'">
+              @if (c.status === 'reserve') {
+                <span class="cell-patient">{{ c.patientNom }}</span>
+                <span class="cell-motif">{{ c.motif }}</span>
+              } @else if (c.status === 'disponible') {
+                <span class="cell-libre">Disponible</span>
+              }
+            </div>
+          }
+        }
+
+      </div>
+    </div>
+  }
+
+  @if (!loading() && vueMode() === 'mois') {
+    <div class="month-wrapper">
+      <div class="month-weekdays">
+        @for (j of jours; track j) {
+          <div class="month-weekday">{{ j.substring(0, 3) }}</div>
+        }
+        <div class="month-weekday">Dim</div>
+      </div>
+      <div class="month-grid">
+        @for (jour of joursDuMois(); track $index) {
+          <button
+            class="month-day"
+            [class.hors-mois]="jour.horsMois"
+            (click)="ouvrirJourDepuisMois(jour.date)"
+          >
+            <span class="month-day-number">{{ jour.date.getDate() }}</span>
+            @if (jour.disponibles > 0 || jour.reserves > 0) {
+              <div class="month-day-badges">
+                @if (jour.disponibles > 0) {
+                  <span class="badge-dispo">{{ jour.disponibles }}</span>
+                }
+                @if (jour.reserves > 0) {
+                  <span class="badge-reserve">{{ jour.reserves }}</span>
+                }
+              </div>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+</div>

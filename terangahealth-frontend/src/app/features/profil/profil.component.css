@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:host {
+  --navy-900: #102642;
+  --teal-500: #1FAAB4;
+  --teal-100: #D7F4F6;
+  --ink-900: #0F172A;
+  --ink-500: #4B5563;
+  --ink-300: #94A3B8;
+  --line: #E6EEF9;
+
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #F7FBFC;
+  min-height: 100vh;
+}
+
+* { box-sizing: border-box; }
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.page-header { margin-bottom: 28px; }
+.page-header h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0 0 8px;
+}
+.page-header p { font-size: 14px; color: var(--ink-500); margin: 0; }
+
+.profile-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px rgba(14, 93, 100, 0.06);
+}
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.avatar {
+  width: 60px; height: 60px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--navy-900), var(--teal-500));
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  flex: none;
+}
+
+.profile-top h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0 0 6px;
+}
+
+.badge {
+  background: var(--teal-100);
+  color: #0E6E75;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #F1F5F9;
+}
+.info-item:last-child { border-bottom: none; padding-bottom: 0; }
+.label { font-size: 13px; color: var(--ink-500); font-weight: 600; }
+.value { font-size: 13.5px; color: var(--ink-900); }
+
+.note {
+  margin: 24px 0 0;
+  font-size: 12.5px;
+  color: var(--ink-300);
+  text-align: center;
+}

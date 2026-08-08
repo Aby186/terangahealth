@@ -1,0 +1,31 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Nos services</h1>
+    <p>Découvrez l'ensemble des spécialités proposées par la clinique.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement des services...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="state-message error">{{ errorMessage() }}</div>
+  }
+
+  <div class="services-grid">
+    @for (service of services(); track service.id; let i = $index) {
+      <div class="service-card" [class]="accentClass(i)">
+        <div class="icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path [attr.d]="iconPath(service.nom)" />
+          </svg>
+        </div>
+
+        <h3>{{ service.nom }}</h3>
+        <p class="description">{{ service.description }}</p>
+      </div>
+    }
+  </div>
+
+</div>

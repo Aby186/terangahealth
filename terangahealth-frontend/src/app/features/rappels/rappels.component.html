@@ -1,0 +1,59 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Mes rappels</h1>
+    <p>Suivez l'état des rappels envoyés pour vos prochains rendez-vous (email et SMS).</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="state-message error">{{ errorMessage() }}</div>
+  }
+
+  @if (!loading() && rendezVous().length === 0) {
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></svg>
+      <p>Aucun rendez-vous confirmé pour l'instant — les rappels apparaîtront ici une fois un RDV confirmé par la secrétaire.</p>
+    </div>
+  }
+
+  <div class="rappels-list">
+    @for (rdv of rendezVous(); track rdv.id) {
+      <div class="rappel-card">
+        <div class="rappel-header">
+          <div>
+            <h3>{{ nomMedecin(rdv) }}</h3>
+            @if (rdv.service) {
+              <p class="service">{{ rdv.service.nom }}</p>
+            }
+          </div>
+          <span class="numero">Réf. {{ rdv.numero_rendez_vous }}</span>
+        </div>
+
+        <div class="etapes">
+          @for (etape of etapes(rdv); track etape.label) {
+            <div class="etape" [class.envoye]="etape.envoye">
+              <div class="etape-icon">
+                @if (etape.envoye) {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg>
+                } @else {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /></svg>
+                }
+              </div>
+              <span>{{ etape.label }}</span>
+            </div>
+          }
+        </div>
+
+        <p class="canaux">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18v12H3z" /><path d="M3 6l9 7 9-7" /></svg>
+          Envoyés par email et SMS
+        </p>
+      </div>
+    }
+  </div>
+
+</div>

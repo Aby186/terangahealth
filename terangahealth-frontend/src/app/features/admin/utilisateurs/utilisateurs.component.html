@@ -1,0 +1,243 @@
+<div class="page">
+
+  <div class="page-header-box">
+    <div class="header-row">
+      <div>
+        <h1>Gestion des utilisateurs</h1>
+        <p>Créez, modifiez et gérez les comptes de la clinique.</p>
+      </div>
+      <button class="btn-primary" (click)="ouvrirFormulaire()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+        Nouvel utilisateur
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+  @if (successMessage()) {
+    <div class="success-box">{{ successMessage() }}</div>
+  }
+
+  @if (formulaireOuvert()) {
+    <div class="form-box">
+      <h3>{{ utilisateurEnEditionId() ? "Modifier l'utilisateur" : 'Créer un utilisateur' }}</h3>
+      <form [formGroup]="form" (ngSubmit)="soumettreFormulaire()">
+        <div class="form-row">
+          <div class="field">
+            <label>Prénom</label>
+            <input type="text" formControlName="prenom" />
+          </div>
+          <div class="field">
+            <label>Nom</label>
+            <input type="text" formControlName="nom" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" formControlName="email" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label>Téléphone</label>
+            <input type="tel" formControlName="telephone" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Mot de passe{{ utilisateurEnEditionId() ? ' (laisser vide pour ne pas changer)' : '' }}</label>
+            <input type="password" formControlName="password" autocomplete="new-password" />
+          </div>
+          <div class="field">
+            <label>Rôle</label>
+            <select formControlName="role">
+              <option value="medecin">Médecin</option>
+              <option value="secretaire">Secrétaire</option>
+              <option value="administrateur">Administrateur</option>
+            </select>
+          </div>
+        </div>
+
+        @if (form.value.role === 'medecin') {
+          <div class="form-row">
+            <div class="field">
+              <label>Service</label>
+              <select formControlName="service_id">
+                <option value="" disabled selected>Sélectionnez</option>
+                @for (s of services(); track s.id) {
+                  <option [value]="s.id">{{ s.nom }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label>Expérience (ans)</label>
+              <input type="number" formControlName="experience" min="0" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Langues parlées</label>
+            <input type="text" formControlName="langues_parlees" placeholder="Français, Wolof..." />
+          </div>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-annuler" (click)="fermerFormulaire()">Annuler</button>
+          <button type="submit" class="btn-confirmer" [disabled]="creationEnCours()">
+            {{ creationEnCours() ? 'Enregistrement...' : (utilisateurEnEditionId() ? 'Enregistrer les modifications' : 'Créer le compte') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (!loading()) {
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon bleu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3" /><circle cx="16.5" cy="9" r="2.3" /><path d="M2.5 20c0-3.3 2.7-6 6-6h1c1 0 2 .2 2.8.7" /><path d="M14.5 20c.3-2.8 2.1-5 4.8-5 1.9 0 3.4.9 4.2 2.4" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalUtilisateurs() }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon vert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 19v-2a3 3 0 013-3h2a3 3 0 013 3v2" /><circle cx="12" cy="8" r="3.2" /><path d="M4 9h.01M20 9h.01" stroke-linecap="round" /><path d="M4 4v3a2 2 0 002 2M20 4v3a2 2 0 01-2 2" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalMedecins() }}</span>
+          <span class="stat-label">Médecins</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="4" width="14" height="17" rx="2" /><path d="M9 3h6a1 1 0 011 1v1H8V4a1 1 0 011-1z" /><path d="M9 11h6M9 15h4" stroke-linecap="round" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalSecretaires() }}</span>
+          <span class="stat-label">Secrétaires</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon violet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.5" /><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalPatients() }}</span>
+          <span class="stat-label">Patients</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="toolbar">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+      <input type="text" placeholder="Rechercher par nom ou email..." [(ngModel)]="recherche" />
+    </div>
+
+    <div class="filter-chips">
+      <button class="chip" [class.active]="filtreRole() === 'tous'" (click)="selectFiltreRole('tous')">Tous</button>
+      <button class="chip" [class.active]="filtreRole() === 'medecin'" (click)="selectFiltreRole('medecin')">Médecins</button>
+      <button class="chip" [class.active]="filtreRole() === 'secretaire'" (click)="selectFiltreRole('secretaire')">Secrétaires</button>
+      <button class="chip" [class.active]="filtreRole() === 'patient'" (click)="selectFiltreRole('patient')">Patients</button>
+      <button class="chip" [class.active]="filtreRole() === 'administrateur'" (click)="selectFiltreRole('administrateur')">Admins</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement...</div>
+  }
+  @if (!loading() && utilisateursFiltres().length === 0) {
+    <div class="empty-state"><p>Aucun utilisateur ne correspond.</p></div>
+  }
+
+  @if (!loading() && utilisateursFiltres().length > 0) {
+    <div class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Service</th>
+            <th>Dernière connexion</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of utilisateursFiltres(); track u.id) {
+            <tr>
+              <td>
+                <div class="user-cell">
+                  <div class="avatar">{{ initiales(u) }}</div>
+                  <div class="user-cell-text">
+                    <span class="user-nom">{{ nomComplet(u) }}</span>
+                    <span class="user-matricule">{{ u.matricule ?? u.code_patient ?? '—' }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ u.email }}</td>
+              <td><span class="role-tag" [class]="'role-' + u.role">{{ roleLabel(u.role) }}</span></td>
+              <td>{{ u.service?.nom ?? '—' }}</td>
+              <td class="derniere-connexion">{{ formatDate(u.last_login_at) }}</td>
+              <td>
+                <span class="badge" [class.badge-actif]="u.statut === 'actif'" [class.badge-bloque]="u.statut !== 'actif'">
+                  {{ u.statut === 'actif' ? 'Actif' : 'Bloqué' }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  @if (u.role !== 'patient') {
+                    <button
+                      class="btn-icon btn-icon-edit"
+                      [disabled]="traitementEnCoursId() === u.id"
+                      (click)="ouvrirEdition(u)"
+                      aria-label="Modifier"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                    </button>
+                  }
+                  @if (!estMoiMeme(u.id)) {
+                    <button
+                      class="btn-icon"
+                      [class.btn-icon-warn]="u.statut === 'actif'"
+                      [class.btn-icon-success]="u.statut !== 'actif'"
+                      [disabled]="traitementEnCoursId() === u.id"
+                      (click)="toggleStatut(u.id)"
+                      [attr.aria-label]="u.statut === 'actif' ? 'Bloquer' : 'Activer'"
+                    >
+                      @if (u.statut === 'actif') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><path d="M4.9 4.9l14.2 14.2" /></svg>
+                      } @else {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5" /></svg>
+                      }
+                    </button>
+                    @if (u.role !== 'patient') {
+                      <button
+                        class="btn-icon btn-icon-danger"
+                        [disabled]="traitementEnCoursId() === u.id"
+                        (click)="supprimer(u.id)"
+                        aria-label="Supprimer"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                      </button>
+                    }
+                  } @else {
+                    <span class="moi-tag">Vous</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

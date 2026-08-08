@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv *)",
+      "Bash(mv src/app/core/authService.ts src/app/core/auth.service.ts)",
+      "Bash(cd \"c:\\\\Users\\\\Lenovo\\\\terangahealth\\\\terangahealth-frontend\" && mv src/app/core/authService.ts src/app/core/auth.service.ts && ls src/app/core/)",
+      "Bash(npx ng *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Lenovo\\terangahealth\\terangahealth-frontend\\src\\app\\core"
+    ]
+  }
+}

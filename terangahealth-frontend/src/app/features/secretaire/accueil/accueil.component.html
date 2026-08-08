@@ -1,0 +1,73 @@
+<div class="accueil">
+  <div class="banner">
+    <h2>Dashboard — Secrétaire</h2>
+    <p>Bienvenue {{ nomComplet() }}</p>
+  </div>
+
+  <div class="cards-fonctionnalites">
+    <a routerLink="/secretaire/demandes" class="carte-fonction mise-en-avant">
+      <div class="icone bleu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M9 12l2 2 4-4" /></svg>
+      </div>
+      <strong>Demandes de RDV</strong>
+      <span>Lister/Confirmer/Refuser</span>
+    </a>
+
+    <a routerLink="/secretaire/medecins" class="carte-fonction">
+      <div class="icone teal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
+      </div>
+      <strong>Liste des Médecins</strong>
+      <span>Consulter/Gérer plannings</span>
+    </a>
+
+    <a routerLink="/secretaire/planning" class="carte-fonction">
+      <div class="icone vert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+      </div>
+      <strong>Gestion Planning</strong>
+      <span>Créer/Modifier plannings</span>
+    </a>
+  </div>
+
+  <div class="cards-stats">
+    <div class="carte-stat">
+      <div class="icone-stat bleu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2" /><path d="M2.5 20c0-3.6 2.9-6.3 6.5-6.3s6.5 2.7 6.5 6.3" /><circle cx="17" cy="8.5" r="2.4" /><path d="M14.8 13.9c.5-.1 1-.2 1.7-.2 3 0 5.5 2.3 5.5 5.2" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalPatients() }}</div>
+      <div class="libelle">Patients</div>
+      <div class="pourcentage">{{ loading() ? '—' : pourcentagePatientsActifs() + '% confirmés' }}</div>
+      <a routerLink="/secretaire/medecins" class="tag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        Voir
+      </a>
+    </div>
+
+    <div class="carte-stat">
+      <div class="icone-stat vert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /><path d="M8.5 15l2 2 4.5-4.5" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalRendezVous() }}</div>
+      <div class="libelle">Rendez-Vous</div>
+      <div class="pourcentage">{{ loading() ? '—' : pourcentageConfirmes() + '% confirmés' }}</div>
+      <a routerLink="/secretaire/rendez-vous" class="tag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5l8-3z"/></svg>
+        Gérer
+      </a>
+    </div>
+
+    <div class="carte-stat">
+      <div class="icone-stat rouge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /><path d="M9.5 14.5l5 5M14.5 14.5l-5 5" /></svg>
+      </div>
+      <div class="valeur">{{ loading() ? '—' : totalAnnules() }}</div>
+      <div class="libelle">Rendez-Vous Annulées</div>
+      <div class="pourcentage">{{ loading() ? '—' : pourcentageAnnules() + '% du total' }}</div>
+      <a routerLink="/secretaire/rendez-vous" class="tag alerte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L1 21h22L12 2zm0 6v6M12 17h.01"/></svg>
+        Voir
+      </a>
+    </div>
+  </div>
+</div>

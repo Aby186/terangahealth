@@ -1,0 +1,32 @@
+<div class="page">
+  <div class="page-header-box">
+    <h1>Notifications</h1>
+    <p>Événements récents de la plateforme (7 derniers jours).</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement...</div>
+  }
+  @if (!loading() && notifications().length === 0) {
+    <div class="empty-state"><p>Aucune notification récente.</p></div>
+  }
+
+  <div class="notif-list">
+    @for (n of notifications(); track $index) {
+      <div class="notif-card" [class]="'notif-' + n.type">
+        <div class="notif-icon">
+          @if (n.type === 'nouveau_compte') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3" /><path d="M2.5 20c0-3.3 2.7-6 6-6h1c1 0 2 .2 2.8.7" /><path d="M19 8v6M22 11h-6" /></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><path d="M4.9 4.9l14.2 14.2" /></svg>
+          }
+        </div>
+        <div class="notif-content">
+          <strong>{{ n.titre }}</strong>
+          <p>{{ n.description }}</p>
+        </div>
+        <span class="notif-date">{{ formatDate(n.date) }}</span>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,103 @@
+<div class="page">
+
+  <a routerLink="/medecins" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+    Retour aux médecins
+  </a>
+
+  <div class="page-header">
+    <h1>Prendre rendez-vous</h1>
+    @if (medecin()) {
+      <p>Avec <strong>{{ nomComplet() }}</strong> @if (medecin()?.service) { — {{ medecin()!.service!.nom }} }</p>
+    }
+  </div>
+
+  @if (successMessage()) {
+    <div class="success-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 12l3 3 5-6" /></svg>
+      {{ successMessage() }}
+    </div>
+  } @else {
+
+    @if (errorMessage()) {
+      <div class="error-box">{{ errorMessage() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="rdv-form">
+
+      @if (!medecinIdDepuisUrl()) {
+        <div class="field">
+          <label>Médecin</label>
+          <select formControlName="medecin_id" (change)="onMedecinChange()">
+            <option value="" disabled selected>Sélectionnez un médecin</option>
+            @for (m of tousLesMedecins(); track m.id) {
+              <option [value]="m.id">Dr {{ m.prenom }} {{ m.nom }} @if (m.service) { — {{ m.service.nom }} }</option>
+            }
+          </select>
+        </div>
+      }
+
+      <div class="field">
+        <label>Date souhaitée</label>
+        <input type="date" formControlName="date" (change)="onDateChange()" [disabled]="!form.value.medecin_id" />
+      </div>
+
+      <div class="field">
+        <label>Créneau horaire</label>
+
+        @if (loadingCreneaux()) {
+          <p class="hint">Chargement des créneaux...</p>
+        } @else if (form.value.date && creneaux().length === 0) {
+          <div class="liste-attente-box">
+            <p class="hint">Aucun créneau disponible à cette date.</p>
+
+            @if (listeAttenteMessage()) {
+              <p class="liste-attente-success">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 12l3 3 5-6" /></svg>
+                {{ listeAttenteMessage() }}
+              </p>
+            } @else {
+              <button
+                type="button"
+                class="btn-liste-attente"
+                [disabled]="rejoignantListeAttente()"
+                (click)="rejoindreListeAttente()"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></svg>
+                {{ rejoignantListeAttente() ? 'Inscription...' : 'Rejoindre la liste d\'attente' }}
+              </button>
+            }
+          </div>
+        }
+
+        <div class="creneaux-grid">
+          @for (creneau of creneaux(); track creneau.id) {
+            <label class="creneau-option" [class.selected]="isSelected(creneau.id)">
+              <input type="radio" formControlName="creneau_id" [value]="creneau.id" />
+              {{ creneau.heure_debut.substring(0, 5) }}
+            </label>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Motif de consultation</label>
+        <textarea formControlName="motif" rows="4" placeholder="Décrivez brièvement le motif de votre consultation (minimum 10 caractères)"></textarea>
+        @if (form.get('motif')?.invalid && form.get('motif')?.touched) {
+          <p class="field-error">Le motif doit contenir au moins 10 caractères.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label>Notes additionnelles <span class="optional">(optionnel)</span></label>
+        <textarea formControlName="notes" rows="2" placeholder="Informations supplémentaires que vous souhaitez communiquer au médecin..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" [disabled]="submitting()">
+        {{ submitting() ? 'Envoi en cours...' : 'Confirmer le rendez-vous' }}
+      </button>
+
+    </form>
+  }
+
+</div>

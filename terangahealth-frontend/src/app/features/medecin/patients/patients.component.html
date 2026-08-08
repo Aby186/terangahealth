@@ -1,0 +1,136 @@
+<div class="page">
+
+  <div class="page-header-box">
+    <h1>Mes patients</h1>
+    <p>Liste des patients ayant pris rendez-vous avec vous.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+
+  @if (!loading()) {
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon bleu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3" /><circle cx="16.5" cy="9" r="2.3" /><path d="M2.5 20c0-3.3 2.7-6 6-6h1c1 0 2 .2 2.8.7" /><path d="M14.5 20c.3-2.8 2.1-5 4.8-5 1.9 0 3.4.9 4.2 2.4" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalPatients() }}</span>
+          <span class="stat-label">Total Patients</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon vert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ patientsActifs() }}</span>
+          <span class="stat-label">Patients Actifs</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ avecRendezVous() }}</span>
+          <span class="stat-label">Avec Rendez-vous</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+    <input type="text" placeholder="Rechercher un patient par nom ou email..." [(ngModel)]="recherche" />
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement de vos patients...</div>
+  }
+
+  @if (!loading() && patientsFiltres().length === 0) {
+    <div class="empty-state">
+      <p>Aucun patient trouvé.</p>
+    </div>
+  }
+
+  @if (!loading() && patientsFiltres().length > 0) {
+    <div class="table-wrapper">
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Contact</th>
+            <th>Sexe</th>
+            <th>Date Naissance</th>
+            <th>RDV Total</th>
+            <th>Dernier RDV</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of patientsFiltres(); track p.id) {
+            <tr>
+              <td>
+                <div class="patient-cell">
+                  <div class="avatar">{{ initiales(p) }}</div>
+                  <span>{{ nomComplet(p) }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="contact-cell">
+                  <span>{{ p.email }}</span>
+                  @if (p.telephone) {
+                    <span class="contact-tel">{{ p.telephone }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ p.sexe === 'homme' ? 'Homme' : p.sexe === 'femme' ? 'Femme' : '—' }}</td>
+              <td>{{ formatDate(p.dateNaissance) }}</td>
+              <td class="text-center">{{ p.totalRdv }}</td>
+              <td>{{ formatDate(p.dernierRdv) }}</td>
+              <td>
+                <span class="badge" [class.badge-actif]="p.actif" [class.badge-inactif]="!p.actif">
+                  {{ p.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon" (click)="toggleLigne(p.id)" aria-label="Voir">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" /></svg>
+                  </button>
+                  <a class="btn-icon" [href]="'mailto:' + p.email" aria-label="Contacter">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18v12H3z" /><path d="M3 6l9 7 9-7" /></svg>
+                  </a>
+                </div>
+              </td>
+            </tr>
+
+            @if (ligneOuverteId() === p.id) {
+              <tr class="row-details">
+                <td colspan="8">
+                  <div class="historique">
+                    <strong>Historique des rendez-vous</strong>
+                    @for (rdv of historiqueDuPatient(p.id); track rdv.id) {
+                      <div class="historique-item">
+                        <span class="historique-date">{{ formatDate(rdv.date_rendez_vous) }} · {{ rdv.heure_rendez_vous.substring(0, 5) }}</span>
+                        <span class="historique-motif">{{ rdv.motif }}</span>
+                        <span class="historique-statut" [class]="'statut-' + rdv.status">{{ statusLabel(rdv.status) }}</span>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

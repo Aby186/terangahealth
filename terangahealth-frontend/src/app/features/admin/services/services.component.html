@@ -1,0 +1,96 @@
+<div class="page">
+
+  <div class="page-header-box">
+    <div class="header-row">
+      <div>
+        <h1>Gestion des services</h1>
+        <p>Créez et gérez les spécialités médicales de la clinique.</p>
+      </div>
+      <button class="btn-primary" (click)="ouvrirCreation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+        Nouveau service
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+  @if (successMessage()) {
+    <div class="success-box">{{ successMessage() }}</div>
+  }
+
+  @if (formulaireOuvert()) {
+    <div class="form-box">
+      <h3>{{ serviceEnEditionId() ? 'Modifier le service' : 'Créer un service' }}</h3>
+      <form [formGroup]="form" (ngSubmit)="enregistrer()">
+        <div class="field">
+          <label>Nom du service</label>
+          <input type="text" formControlName="nom" placeholder="Ex : Cardiologie" />
+        </div>
+
+        <div class="field">
+          <label>Description</label>
+          <textarea formControlName="description" rows="3" placeholder="Décrivez la spécialité..."></textarea>
+        </div>
+
+        <div class="field field-small">
+          <label>Durée de consultation (min)</label>
+          <input type="number" formControlName="duree_consultation" min="5" max="180" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-annuler" (click)="fermerFormulaire()">Annuler</button>
+          <button type="submit" class="btn-confirmer" [disabled]="enregistrementEnCours()">
+            {{ enregistrementEnCours() ? 'Enregistrement...' : (serviceEnEditionId() ? 'Enregistrer' : 'Créer le service') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <div class="filter-box">
+    <div class="filter-row">
+      <div class="filter-field">
+        <label>Rechercher</label>
+        <input type="text" placeholder="Nom du service, description..." [(ngModel)]="recherche" [ngModelOptions]="{ standalone: true }" />
+      </div>
+      <button type="button" class="btn-reinitialiser" (click)="reinitialiser()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        Réinitialiser
+      </button>
+    </div>
+    <p class="filter-count">{{ servicesFiltres().length }} service{{ servicesFiltres().length > 1 ? 's' : '' }} trouvé{{ servicesFiltres().length > 1 ? 's' : '' }}</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement des services...</div>
+  }
+  @if (!loading() && servicesFiltres().length === 0) {
+    <div class="empty-state"><p>Aucun service ne correspond à votre recherche.</p></div>
+  }
+
+  <div class="services-grid">
+    @for (service of servicesFiltres(); track service.id) {
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path [attr.d]="iconPath(service.nom)" /></svg>
+        </div>
+        <h3>{{ service.nom }}</h3>
+        <p class="description">{{ service.description }}</p>
+        <p class="duree">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+          {{ service.duree_consultation }} min par consultation
+        </p>
+
+        <div class="service-actions">
+          <button class="btn-modifier" (click)="ouvrirEdition(service)">Modifier</button>
+          <button class="btn-supprimer" [disabled]="traitementEnCoursId() === service.id" (click)="supprimer(service.id)">
+            Supprimer
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

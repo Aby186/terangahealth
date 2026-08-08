@@ -1,0 +1,135 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Demandes de rendez-vous</h1>
+    <p>Confirmez, refusez ou reprogrammez les demandes en attente. Les cas urgents apparaissent en premier.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="state-message">Chargement des demandes...</div>
+  }
+
+  @if (!loading() && demandesEnAttente().length === 0) {
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4" /><rect x="3" y="5" width="18" height="16" rx="2" /></svg>
+      <p>Aucune demande en attente pour le moment.</p>
+    </div>
+  }
+
+  <div class="demandes-list">
+    @for (rdv of demandesEnAttente(); track rdv.id) {
+      <div class="demande-card" [class.urgent]="rdv.urgent">
+
+        <div class="demande-header">
+          <span class="date-heure">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+            {{ formatDate(rdv.date_rendez_vous) }} · {{ rdv.heure_rendez_vous.substring(0, 5) }}
+          </span>
+          <div class="header-tags">
+            @if (rdv.urgent) {
+              <span class="tag-urgent">Urgent</span>
+            }
+            <span class="tag-statut">En attente</span>
+          </div>
+          <span class="numero">Réf. {{ rdv.numero_rendez_vous }}</span>
+        </div>
+
+        <div class="info-lines">
+          <p class="info-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>
+            <strong>Patient :</strong> {{ rdv.patient.prenom }} {{ rdv.patient.nom }}
+          </p>
+          <p class="info-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>
+            <strong>Médecin :</strong> {{ nomMedecin(rdv) }}
+          </p>
+          @if (rdv.service) {
+            <p><strong>Service :</strong> {{ rdv.service.nom }}</p>
+          }
+          <p><strong>Motif :</strong> {{ rdv.motif }}</p>
+        </div>
+
+        @if (detailsOuvertId() === rdv.id) {
+          <div class="details-box">
+            <p>{{ rdv.motif }}</p>
+          </div>
+        }
+
+        @if (reprogrammationOuverteId() === rdv.id) {
+          <div class="reprog-box">
+            <label>Nouvelle date</label>
+            <input
+              type="date"
+              [ngModel]="nouvelleDateReprog()"
+              (ngModelChange)="nouvelleDateReprog.set($event)"
+              (change)="onDateReprogChange(rdv.medecin_id)"
+            />
+
+            @if (loadingCreneauxReprog()) {
+              <p class="hint">Chargement des créneaux...</p>
+            } @else if (nouvelleDateReprog() && creneauxReprog().length === 0) {
+              <p class="hint">Aucun créneau disponible à cette date.</p>
+            }
+
+            <div class="creneaux-grid">
+              @for (creneau of creneauxReprog(); track creneau.id) {
+                <label class="creneau-option" [class.selected]="creneauChoisiId() === creneau.id">
+                  <input
+                    type="radio"
+                    name="creneau-{{ rdv.id }}"
+                    [checked]="creneauChoisiId() === creneau.id"
+                    (change)="creneauChoisiId.set(creneau.id)"
+                  />
+                  {{ creneau.heure_debut.substring(0, 5) }}
+                </label>
+              }
+            </div>
+
+            <div class="reprog-actions">
+              <button class="btn-annuler-reprog" (click)="fermerReprogrammation()">Annuler</button>
+              <button
+                class="btn-confirmer-reprog"
+                [disabled]="!creneauChoisiId() || traitementEnCoursId() === rdv.id"
+                (click)="confirmerReprogrammation(rdv.id)"
+              >
+                {{ traitementEnCoursId() === rdv.id ? 'Enregistrement...' : 'Valider le nouveau créneau' }}
+              </button>
+            </div>
+          </div>
+        }
+
+        <div class="demande-actions">
+          <button class="btn-voir" (click)="toggleDetails(rdv.id)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" /></svg>
+            Voir
+          </button>
+          <button
+            class="btn-confirmer"
+            [disabled]="traitementEnCoursId() === rdv.id"
+            (click)="confirmer(rdv.id)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" /></svg>
+            Confirmer
+          </button>
+          <button class="btn-reprogrammer" (click)="ouvrirReprogrammation(rdv)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+            Reprogrammer
+          </button>
+          <button
+            class="btn-refuser"
+            [disabled]="traitementEnCoursId() === rdv.id"
+            (click)="refuser(rdv.id)"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            Annuler
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

@@ -1,0 +1,39 @@
+<div class="page">
+
+  <div class="page-header-box">
+    <h1>Mon profil</h1>
+    <p>Consultez vos informations personnelles.</p>
+  </div>
+
+  @if (auth.currentUser(); as user) {
+    <div class="profile-card">
+      <div class="profile-top">
+        <div class="avatar">{{ initiales() }}</div>
+        <div>
+          <h2>{{ user.prenom }} {{ user.nom }}</h2>
+          @if (user.matricule) {
+            <span class="badge">{{ user.matricule }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Email</span>
+          <span class="value">{{ user.email }}</span>
+        </div>
+        @if (user.telephone) {
+          <div class="info-item">
+            <span class="label">Téléphone</span>
+            <span class="value">{{ user.telephone }}</span>
+          </div>
+        }
+        <div class="info-item">
+          <span class="label">Rôle</span>
+          <span class="value">Administrateur</span>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,118 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Mes rendez-vous</h1>
+    <p>Retrouvez ici l'ensemble de vos consultations passées et à venir.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="state-message">Chargement de vos rendez-vous...</div>
+  }
+
+  @if (!loading() && rendezVous().length === 0) {
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+      <p>Vous n'avez pas encore de rendez-vous.</p>
+      <a routerLink="/medecins" class="btn-link">Prendre rendez-vous</a>
+    </div>
+  }
+
+  @if (!loading() && rendezVous().length > 0) {
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalCount() }}</span>
+          <span class="stat-label">Total RDV</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-attente">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ enAttenteCount() }}</span>
+          <span class="stat-label">En attente</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-confirme">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ confirmeCount() }}</span>
+          <span class="stat-label">Confirmés</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-annule">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M15 9l-6 6M9 9l6 6" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ annuleCount() }}</span>
+          <span class="stat-label">Annulés</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && rendezVous().length > 0) {
+    <button class="list-header" (click)="toggleListe()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
+      Liste des rendez-vous
+      <span class="count-badge">{{ totalCount() }} résultat{{ totalCount() > 1 ? 's' : '' }}</span>
+      <svg class="chevron" [class.open]="listeOuverte()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" /></svg>
+    </button>
+  }
+
+  @if (listeOuverte()) {
+    <div class="rdv-list">
+      @for (rdv of rendezVous(); track rdv.id) {
+        <div class="rdv-card" [class.urgent]="rdv.urgent">
+          <div class="rdv-main">
+            <div class="rdv-date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+              {{ formatDate(rdv.date_rendez_vous) }} · {{ rdv.heure_rendez_vous.substring(0, 5) }}
+            </div>
+
+            <h3>{{ nomMedecin(rdv) }}</h3>
+            @if (rdv.service) {
+              <p class="service">{{ rdv.service.nom }}</p>
+            }
+            <p class="motif">{{ rdv.motif }}</p>
+            <p class="numero">Réf. {{ rdv.numero_rendez_vous }}</p>
+          </div>
+
+          <div class="rdv-side">
+            <div class="tags-row">
+              @if (rdv.urgent) {
+                <span class="tag tag-urgent">Urgent</span>
+              }
+              <span class="tag" [class]="'tag-' + rdv.status">{{ statusLabel(rdv.status) }}</span>
+            </div>
+
+            @if (rdv.status !== 'annule') {
+              <button
+                class="btn-cancel"
+                [disabled]="cancellingId() === rdv.id"
+                (click)="annuler(rdv.id)"
+              >
+                {{ cancellingId() === rdv.id ? 'Annulation...' : 'Annuler' }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

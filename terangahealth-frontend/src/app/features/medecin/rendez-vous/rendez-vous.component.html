@@ -1,0 +1,165 @@
+<div class="page">
+
+  <div class="page-header-box">
+    <h1>Lister mes rendez-vous</h1>
+    <p>Consultez, confirmez, annulez ou reprogrammez vos rendez-vous.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+
+  <div class="filters-row">
+    <div class="filter-field">
+      <label>Statut</label>
+      <select [(ngModel)]="filtreStatut">
+        <option value="tous">Tous les statuts</option>
+        <option value="en_attente">En attente</option>
+        <option value="confirme">Confirmé</option>
+        <option value="annule">Annulé</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <label>Date</label>
+      <input type="date" [(ngModel)]="filtreDate" />
+    </div>
+    <button class="btn-clear" (click)="effacerFiltres()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+      Effacer les filtres
+    </button>
+  </div>
+
+  @if (!loading()) {
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ totalCount() }}</span>
+          <span class="stat-label">Total RDV</span>
+        </div>
+      </div>
+      <div class="stat-card stat-attente">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ enAttenteCount() }}</span>
+          <span class="stat-label">En attente</span>
+        </div>
+      </div>
+      <div class="stat-card stat-confirme">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ confirmeCount() }}</span>
+          <span class="stat-label">Confirmés</span>
+        </div>
+      </div>
+      <div class="stat-card stat-annule">
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M15 9l-6 6M9 9l6 6" /></svg>
+        </div>
+        <div class="stat-text">
+          <span class="stat-value">{{ annuleCount() }}</span>
+          <span class="stat-label">Annulés</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="state-message">Chargement...</div>
+  }
+  @if (!loading() && rendezVousFiltres().length === 0) {
+    <div class="empty-state"><p>Aucun rendez-vous ne correspond à ces filtres.</p></div>
+  }
+
+  <div class="rdv-list">
+    @for (rdv of rendezVousFiltres(); track rdv.id) {
+      <div class="rdv-card" [class.urgent]="rdv.urgent">
+        <div class="rdv-main">
+          <div class="rdv-top">
+            <span class="date-heure">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+              {{ formatDate(rdv.date_rendez_vous) }} · {{ rdv.heure_rendez_vous.substring(0, 5) }}
+            </span>
+            @if (rdv.urgent) { <span class="tag tag-urgent">Urgent</span> }
+            <span class="tag" [class]="'tag-' + rdv.status">{{ statusLabel(rdv.status) }}</span>
+          </div>
+
+          <div class="patient-ligne">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
+            <strong>{{ nomPatient(rdv) }}</strong>
+          </div>
+
+          @if (rdv.service) { <p class="service">{{ rdv.service.nom }}</p> }
+          <p class="motif">{{ rdv.motif }}</p>
+          <p class="numero">Réf. {{ rdv.numero_rendez_vous }}</p>
+
+          @if (reprogrammationOuverteId() === rdv.id) {
+            <div class="reprog-box">
+              <label>Nouvelle date</label>
+              <input
+                type="date"
+                [ngModel]="nouvelleDateReprog()"
+                (ngModelChange)="nouvelleDateReprog.set($event)"
+                (change)="onDateReprogChange()"
+              />
+
+              @if (loadingCreneauxReprog()) {
+                <p class="hint">Chargement des créneaux...</p>
+              } @else if (nouvelleDateReprog() && creneauxReprog().length === 0) {
+                <p class="hint">Aucun créneau disponible à cette date.</p>
+              }
+
+              <div class="creneaux-grid">
+                @for (creneau of creneauxReprog(); track creneau.id) {
+                  <label class="creneau-option" [class.selected]="creneauChoisiId() === creneau.id">
+                    <input
+                      type="radio"
+                      name="creneau-{{ rdv.id }}"
+                      [checked]="creneauChoisiId() === creneau.id"
+                      (change)="creneauChoisiId.set(creneau.id)"
+                    />
+                    {{ creneau.heure_debut.substring(0, 5) }}
+                  </label>
+                }
+              </div>
+
+              <div class="reprog-actions">
+                <button class="btn-annuler-reprog" (click)="fermerReprogrammation()">Annuler</button>
+                <button
+                  class="btn-confirmer-reprog"
+                  [disabled]="!creneauChoisiId() || traitementEnCoursId() === rdv.id"
+                  (click)="confirmerReprogrammation(rdv.id)"
+                >
+                  {{ traitementEnCoursId() === rdv.id ? 'Enregistrement...' : 'Valider le nouveau créneau' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="rdv-actions">
+          @if (rdv.status === 'en_attente') {
+            <button class="btn-confirmer" [disabled]="traitementEnCoursId() === rdv.id" (click)="confirmer(rdv.id)">
+              Confirmer
+            </button>
+          }
+          @if (rdv.status !== 'annule') {
+            <button class="btn-reprogrammer" (click)="ouvrirReprogrammation(rdv)">
+              Reprogrammer
+            </button>
+            <button class="btn-annuler" [disabled]="traitementEnCoursId() === rdv.id" (click)="annuler(rdv.id)">
+              Annuler
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

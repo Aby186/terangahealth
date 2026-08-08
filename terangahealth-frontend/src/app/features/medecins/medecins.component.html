@@ -1,0 +1,88 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Nos médecins</h1>
+    <p>Choisissez un médecin pour consulter ses disponibilités et prendre rendez-vous.</p>
+  </div>
+
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+    <input type="text" placeholder="Rechercher par nom ou spécialité..." [(ngModel)]="recherche" />
+  </div>
+
+  <div class="filter-row">
+    @for (specialite of specialites(); track specialite) {
+      <button class="filter-chip" [class.active]="specialiteActive() === specialite" (click)="selectSpecialite(specialite)">
+        {{ specialite }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement des médecins...</div>
+  }
+
+  @if (!loading() && !errorMessage() && medecinsFiltres().length === 0) {
+    <div class="state-message">
+      @if (recherche()) {
+        Aucun médecin ne correspond à "{{ recherche() }}".
+      } @else {
+        Aucun médecin disponible pour le moment.
+      }
+    </div>
+  }
+
+  <div class="medecins-grid">
+    @for (medecin of medecinsFiltres(); track medecin.id) {
+      <div class="medecin-card">
+        <div class="medecin-top">
+          <div class="avatar">
+            @if (medecin.photo) {
+              <img [src]="medecin.photo" [alt]="nomComplet(medecin)" />
+            } @else {
+              <span>{{ medecin.prenom.charAt(0) }}{{ medecin.nom.charAt(0) }}</span>
+            }
+          </div>
+          @if (medecin.service) {
+            <span class="badge">{{ medecin.service.nom }}</span>
+          }
+        </div>
+
+        <h3>{{ nomComplet(medecin) }}</h3>
+
+        @if (medecin.experience) {
+          <p class="meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.3L22 9l-5 5 1.3 7.2L12 17.8 5.7 21.2 7 14 2 9l7.1-.7z" /></svg>
+            {{ medecin.experience }} ans d'expérience
+          </p>
+        }
+
+        @if (medecin.langues_parlees) {
+          <p class="meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z" /></svg>
+            {{ medecin.langues_parlees }}
+          </p>
+        }
+
+        @if (medecin.service?.description) {
+          <p class="description">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+            {{ medecin.service?.description }}
+          </p>
+        }
+
+        <div class="card-actions">
+          <button class="btn-planning" (click)="prendreRdv(medecin.id)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+            Planning
+          </button>
+          <button class="btn-rdv" (click)="prendreRdv(medecin.id)">
+            Prendre RDV
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

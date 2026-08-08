@@ -1,0 +1,65 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Liste des médecins</h1>
+    <p>Coordonnées et informations des médecins de la clinique.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement des médecins...</div>
+  }
+  @if (errorMessage()) {
+    <div class="state-message error">{{ errorMessage() }}</div>
+  }
+
+  <div class="medecins-grid">
+    @for (medecin of medecins(); track medecin.id) {
+      <div class="medecin-card">
+        <div class="medecin-top">
+          <div class="avatar">
+            @if (medecin.photo) {
+              <img [src]="medecin.photo" [alt]="nomComplet(medecin)" />
+            } @else {
+              <span>{{ medecin.prenom.charAt(0) }}{{ medecin.nom.charAt(0) }}</span>
+            }
+          </div>
+          @if (medecin.service) {
+            <span class="badge">{{ medecin.service.nom }}</span>
+          }
+        </div>
+
+        <h3>{{ nomComplet(medecin) }}</h3>
+
+        @if (medecin.experience) {
+          <p class="meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.3L22 9l-5 5 1.3 7.2L12 17.8 5.7 21.2 7 14 2 9l7.1-.7z" /></svg>
+            {{ medecin.experience }} ans d'expérience
+          </p>
+        }
+
+        @if (medecin.langues_parlees) {
+          <p class="meta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z" /></svg>
+            {{ medecin.langues_parlees }}
+          </p>
+        }
+
+        <div class="contact-block">
+          @if (medecin.email) {
+            <p class="contact">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18v12H3z" /><path d="M3 6l9 7 9-7" /></svg>
+              {{ medecin.email }}
+            </p>
+          }
+          @if (medecin.telephone) {
+            <p class="contact">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .3 2 .6 2.9a2 2 0 01-.5 2.1L8 9.9a16 16 0 006 6l1.2-1.2a2 2 0 012.1-.5c.9.3 1.9.5 2.9.6a2 2 0 011.7 2z" /></svg>
+              {{ medecin.telephone }}
+            </p>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

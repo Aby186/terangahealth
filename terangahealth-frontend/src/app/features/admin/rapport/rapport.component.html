@@ -1,0 +1,54 @@
+<div class="page">
+  <div class="page-header-box">
+    <h1>Rapport d'activité</h1>
+    <p>Vue analytique de l'activité de la plateforme.</p>
+  </div>
+
+  @if (!loading()) {
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{{ totalRdv() }}</div>
+        <div class="stat-label">Total rendez-vous</div>
+      </div>
+      <div class="stat-card stat-danger">
+        <div class="stat-value">{{ tauxAbsences() }}%</div>
+        <div class="stat-label">Taux d'annulation</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ totalAnnules() }}</div>
+        <div class="stat-label">Rendez-vous annulés</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Tendance des consultations (12 derniers mois)</h3>
+      <div class="bar-chart">
+        @for (s of tendanceMensuelle(); track s.mois) {
+          <div class="bar-col">
+            <div class="bar" [style.height.%]="hauteurBarre(s.total)">
+              <span class="bar-value">{{ s.total }}</span>
+            </div>
+            <span class="bar-label">{{ s.mois }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Spécialités les plus demandées</h3>
+      <div class="specialites-list">
+        @for (s of specialitesDemandees(); track s.nom) {
+          <div class="specialite-row">
+            <span class="specialite-nom">{{ s.nom }}</span>
+            <div class="specialite-bar-track">
+              <div class="specialite-bar-fill" [style.width.%]="s.pourcentage"></div>
+            </div>
+            <span class="specialite-total">{{ s.total }} ({{ s.pourcentage }}%)</span>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="state-message">Chargement des données...</div>
+  }
+</div>
