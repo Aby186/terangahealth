@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Creneau extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\ProtegeCreneauBloque;
 
     protected $table = 'creneaux';
 
@@ -33,7 +34,6 @@ class Creneau extends Model
     {
         return $query->where('status', 'disponible');
     }
-    
 
     protected static function booted(): void
     {

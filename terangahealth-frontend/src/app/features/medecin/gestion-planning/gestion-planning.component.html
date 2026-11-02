@@ -1,7 +1,7 @@
 <div class="page">
 
   <div class="page-header-box">
-    <h1>Gestion planning</h1>
+    <h1>Visualiser Planning</h1>
     <p>Créez vos journées de disponibilité et générez vos créneaux horaires.</p>
   </div>
 
@@ -12,32 +12,151 @@
     <div class="success-box">{{ successMessage() }}</div>
   }
 
-  <div class="new-planning-box">
-    <label>Ajouter une journée de disponibilité</label>
-    <div class="new-planning-row">
-      <input type="date" [(ngModel)]="nouvelleDate" />
-      <button
-        class="btn-primary"
-        [disabled]="!nouvelleDate() || creationEnCours()"
-        (click)="creerPlanning()"
-      >
-        {{ creationEnCours() ? 'Création...' : '+ Créer le planning' }}
-      </button>
+  <div class="top-row">
+    <div class="new-planning-box">
+      <label>Ajouter une journée de disponibilité</label>
+      <div class="new-planning-row">
+        <input type="date" [(ngModel)]="nouvelleDate" [min]="todayLocalDateString()" />
+        <button
+          class="btn-primary"
+          [disabled]="!nouvelleDate() || creationEnCours()"
+          (click)="creerPlanning()"
+        >
+          {{ creationEnCours() ? 'Création...' : '+ Créer le planning' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="search-planning-box">
+      <label>Rechercher une journée</label>
+      <div class="search-planning-row">
+        <input type="date" [(ngModel)]="dateRecherche" />
+        <button class="btn-search" type="button" (click)="rechercherJournee()">Rechercher</button>
+      </div>
     </div>
   </div>
+
+  @if (resultatRecherche() || messageRecherche()) {
+    <div class="search-result-panel">
+      <div class="search-result-header">
+        <span>{{ resultatRecherche() ? 'Résultat de la recherche' : '' }}</span>
+        <button class="search-result-clear" type="button" (click)="effacerRecherche()">Effacer la recherche</button>
+      </div>
+
+      @if (resultatRecherche(); as planningRecherche) {
+        <div class="planning-card" [class.inactif]="planningRecherche.status === 'inactif'">
+          <div class="planning-header">
+            <div class="planning-date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
+              {{ formatDate(planningRecherche.date_planning) }}
+              <span class="tag" [class.tag-inactif]="planningRecherche.status === 'inactif'">
+                {{ planningRecherche.status === 'actif' ? 'Actif' : 'Inactif (congé)' }}
+              </span>
+            </div>
+
+            @if (canModifyPlanning(planningRecherche)) {
+              <div class="planning-header-actions">
+                <button class="btn-toggle" [disabled]="traitementEnCoursId() === planningRecherche.id" (click)="toggleStatus(planningRecherche.id)">
+                  {{ planningRecherche.status === 'actif' ? 'Désactiver' : 'Activer' }}
+                </button>
+                @if (planningRecherche.status === 'inactif') {
+                  <button class="btn-supprimer-planning" [disabled]="traitementEnCoursId() === planningRecherche.id" (click)="supprimerPlanning(planningRecherche.id)">
+                    Supprimer
+                  </button>
+                }
+                <button class="btn-generer" (click)="ouvrirGenerationCreneaux(planningRecherche.id)">
+                  + Générer des créneaux
+                </button>
+              </div>
+            }
+          </div>
+
+          @if (canModifyPlanning(planningRecherche) && planningOuvertPourGenerationId() === planningRecherche.id) {
+            <div class="generation-box">
+              <div class="generation-row">
+                <div class="gen-field">
+                  <label>Heure de début</label>
+                  <input type="time" [(ngModel)]="heureDebutGen" />
+                </div>
+                <div class="gen-field">
+                  <label>Heure de fin</label>
+                  <input type="time" [(ngModel)]="heureFinGen" />
+                </div>
+                <div class="gen-field">
+                  <label>Durée (min)</label>
+                  <input type="number" [(ngModel)]="dureeGen" min="5" max="120" step="5" />
+                </div>
+              </div>
+              <div class="generation-actions">
+                <button class="btn-annuler-gen" (click)="fermerGenerationCreneaux()">Annuler</button>
+                <button class="btn-valider-gen" [disabled]="generationEnCours()" (click)="genererCreneaux(planningRecherche.id)">
+                  {{ generationEnCours() ? 'Génération...' : 'Générer les créneaux' }}
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (planningRecherche.creneaux.length === 0) {
+            <p class="no-creneaux">Aucun créneau généré pour cette journée.</p>
+          } @else {
+            <div class="creneaux-grid">
+              @for (creneau of planningRecherche.creneaux; track creneau.id) {
+                <div class="creneau-chip" [class]="'status-' + creneau.status">
+                  <span>{{ creneau.heure_debut.substring(0, 5) }}</span>
+
+                  @if (canModifyPlanning(planningRecherche)) {
+                    @if (creneau.status === 'indisponible') {
+                      <span class="creneau-indisponible-badge">Désactivé</span>
+                      <button
+                        class="btn-bloquer"
+                        [disabled]="creneauTraitementId() === creneau.id"
+                        (click)="bloquerCreneau(creneau.id, creneau.status)"
+                        aria-label="Activer le créneau"
+                      >
+                        {{ creneauTraitementId() === creneau.id ? '...' : 'Activer' }}
+                      </button>
+                    } @else if (creneau.status === 'disponible' || creneau.status === 'reserve') {
+                      @if (creneau.status === 'disponible') {
+                        <button class="btn-suppr-creneau" (click)="supprimerCreneau(creneau.id)" aria-label="Supprimer">
+                          <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                        </button>
+                      }
+                      <button
+                        class="btn-bloquer"
+                        [disabled]="creneauTraitementId() === creneau.id"
+                        (click)="bloquerCreneau(creneau.id, creneau.status)"
+                        aria-label="Désactiver le créneau"
+                      >
+                        <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10V8a5 5 0 0110 0v2M6 10h12v9H6z" /></svg>
+                        {{ creneauTraitementId() === creneau.id ? '...' : 'Désactiver' }}
+                      </button>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (messageRecherche()) {
+        <p class="search-message">{{ messageRecherche() }}</p>
+      }
+    </div>
+  }
 
   @if (loading()) {
     <div class="state-message">Chargement du planning...</div>
   }
 
-  @if (!loading() && plannings().length === 0) {
+  @if (!loading() && planningsFuturs.length === 0) {
     <div class="empty-state">
       <p>Aucune journée de planning pour l'instant. Ajoutez-en une ci-dessus.</p>
     </div>
   }
 
   <div class="plannings-list">
-    @for (planning of plannings(); track planning.id) {
+    @for (planning of planningsFuturs; track planning.id) {
       <div class="planning-card" [class.inactif]="planning.status === 'inactif'">
 
         <div class="planning-header">
@@ -96,9 +215,31 @@
             @for (creneau of planning.creneaux; track creneau.id) {
               <div class="creneau-chip" [class]="'status-' + creneau.status">
                 <span>{{ creneau.heure_debut.substring(0, 5) }}</span>
-                @if (creneau.status === 'disponible') {
-                  <button class="btn-suppr-creneau" (click)="supprimerCreneau(creneau.id)" aria-label="Supprimer">
-                    <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+
+                @if (creneau.status === 'indisponible') {
+                  <span class="creneau-indisponible-badge">Désactivé</span>
+                  <button
+                    class="btn-bloquer"
+                    [disabled]="creneauTraitementId() === creneau.id"
+                    (click)="bloquerCreneau(creneau.id, creneau.status)"
+                    aria-label="Activer le créneau"
+                  >
+                    {{ creneauTraitementId() === creneau.id ? '...' : 'Activer' }}
+                  </button>
+                } @else if (creneau.status === 'disponible' || creneau.status === 'reserve') {
+                  @if (creneau.status === 'disponible') {
+                    <button class="btn-suppr-creneau" (click)="supprimerCreneau(creneau.id)" aria-label="Supprimer">
+                      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                    </button>
+                  }
+                  <button
+                    class="btn-bloquer"
+                    [disabled]="creneauTraitementId() === creneau.id"
+                    (click)="bloquerCreneau(creneau.id, creneau.status)"
+                    aria-label="Désactiver le créneau"
+                  >
+                    <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10V8a5 5 0 0110 0v2M6 10h12v9H6z" /></svg>
+                    {{ creneauTraitementId() === creneau.id ? '...' : 'Désactiver' }}
                   </button>
                 }
               </div>

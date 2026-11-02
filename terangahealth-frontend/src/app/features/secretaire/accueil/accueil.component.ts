@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth.service';
-import { RendezVousService, RendezVousItem } from '../../../core/rendez-vous.service';
+import { RendezVousService, RendezVousItem, AlertesReprogrammationResponse } from '../../../core/rendez-vous.service';
 
 @Component({
   selector: 'app-secretaire-accueil',
@@ -16,11 +16,13 @@ export class SecretaireAccueilComponent implements OnInit {
   private rendezVousService = inject(RendezVousService);
 
   tousLesRendezVous = signal<RendezVousItem[]>([]);
+  alertesReprogrammation = signal<AlertesReprogrammationResponse>({ total: 0, rendez_vous: [] });
   loading = signal(true);
 
   totalRendezVous = computed(() => this.tousLesRendezVous().length);
   totalAnnules = computed(() => this.tousLesRendezVous().filter((r) => r.status === 'annule').length);
- totalPatients = computed(() => {
+  totalAReprogrammer = computed(() => this.alertesReprogrammation().total);
+  totalPatients = computed(() => {
     const ids = this.tousLesRendezVous().map((r) => r.patient_id).filter((id) => id != null);
     return new Set(ids).size;
   });
@@ -32,6 +34,11 @@ export class SecretaireAccueilComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
+    });
+
+    this.rendezVousService.alertesReprogrammation().subscribe({
+      next: (data) => this.alertesReprogrammation.set(data),
+      error: () => this.alertesReprogrammation.set({ total: 0, rendez_vous: [] }),
     });
   }
 

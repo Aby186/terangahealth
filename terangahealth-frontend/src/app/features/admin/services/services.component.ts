@@ -37,6 +37,7 @@ export class AdminServicesComponent implements OnInit {
     nom: ['', Validators.required],
     description: ['', Validators.required],
     duree_consultation: [30, [Validators.required, Validators.min(5), Validators.max(180)]],
+    tarif: [null as number | null, [Validators.required, Validators.min(0)]],
   });
 
   ngOnInit(): void {
@@ -61,12 +62,19 @@ export class AdminServicesComponent implements OnInit {
     this.recherche.set('');
   }
 
+  // Prix de la consultation (champ tarif du service), formate en FCFA
+  prix(service: ServiceMedical): string {
+    const tarif = Number((service as ServiceMedical & { tarif?: number | string }).tarif);
+    if (!tarif) return '';
+    return `${tarif.toLocaleString('fr-FR')} FCFA`;
+  }
+
   iconPath(nom: string): string {
     const n = nom.toLowerCase();
     if (n.includes('cardio')) return 'M12 21s-7-4.4-9.5-9C.7 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.4C11.6 6 13 5 15 5c3.6 0 5.3 3.4 3.5 7-2.5 4.6-9.5 9-9.5 9z';
     if (n.includes('dermato')) return 'M12 2a9 9 0 00-9 9c0 4 2.5 6.5 5 8.5.8.6 1.6 1 2.5 1.5.9-.5 1.7-.9 2.5-1.5 2.5-2 5-4.5 5-8.5a9 9 0 00-9-9z';
-    if (n.includes('pédiatr')) return 'M9 12a3 3 0 106 0 3 3 0 00-6 0zM5 8a3 3 0 016 0M13 8a3 3 0 016 0M6 21c0-4 2.7-6 6-6s6 2 6 6';
-    if (n.includes('diabéto')) return 'M12 2.5c-2 4-6 8.3-6 12a6 6 0 0012 0c0-3.7-4-8-6-12z';
+    if (n.includes('p\u00e9diatr')) return 'M9 12a3 3 0 106 0 3 3 0 00-6 0zM5 8a3 3 0 016 0M13 8a3 3 0 016 0M6 21c0-4 2.7-6 6-6s6 2 6 6';
+    if (n.includes('diab\u00e9to')) return 'M12 2.5c-2 4-6 8.3-6 12a6 6 0 0012 0c0-3.7-4-8-6-12z';
     if (n.includes('orl')) return 'M4 6a2 2 0 012-2h3l2 4-1.5 1.5a11 11 0 006 6L17 14l4 2v3a2 2 0 01-2 2C10.5 21 4 14.5 4 6z';
     if (n.includes('gastro')) return 'M8 3v6a4 4 0 004 4 4 4 0 004-4V3M8 3H6M16 3h2M12 13v8';
     return 'M12 2l2.9 6.3L22 9l-5 5 1.3 7.2L12 17.8 5.7 21.2 7 14 2 9l7.1-.7z';
@@ -74,7 +82,7 @@ export class AdminServicesComponent implements OnInit {
 
   ouvrirCreation(): void {
     this.serviceEnEditionId.set(null);
-    this.form.reset({ duree_consultation: 30 });
+    this.form.reset({ duree_consultation: 30, tarif: null });
     this.formulaireOuvert.set(true);
   }
 
@@ -84,6 +92,7 @@ export class AdminServicesComponent implements OnInit {
       nom: service.nom,
       description: service.description,
       duree_consultation: service.duree_consultation,
+      tarif: Number((service as any).tarif) || null,
     });
     this.formulaireOuvert.set(true);
   }
@@ -116,7 +125,7 @@ export class AdminServicesComponent implements OnInit {
         this.charger();
         setTimeout(() => this.successMessage.set(null), 3000);
       },
-     error: (err: any) => {
+      error: (err: any) => {
         this.enregistrementEnCours.set(false);
         this.errorMessage.set(err.error?.message ?? 'Impossible d\'enregistrer ce service.');
       },
@@ -124,7 +133,7 @@ export class AdminServicesComponent implements OnInit {
   }
 
   supprimer(id: number): void {
-    if (!confirm('Supprimer définitivement ce service ?')) return;
+    if (!confirm('Supprimer d\u00e9finitivement ce service ?')) return;
 
     this.traitementEnCoursId.set(id);
     this.servicesService.supprimer(id).subscribe({

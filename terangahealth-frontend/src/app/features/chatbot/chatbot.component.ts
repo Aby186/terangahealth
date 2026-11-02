@@ -10,6 +10,11 @@ interface MessageChat {
   services?: ServiceRecommande[];
 }
 
+interface HistoriqueChatMessage {
+  role: 'patient' | 'assistant';
+  texte: string;
+}
+
 @Component({
   selector: 'app-chatbot',
   standalone: true,
@@ -25,12 +30,7 @@ export class ChatbotComponent {
   saisie = signal('');
   enCours = signal(false);
 
-  messages = signal<MessageChat[]>([
-    {
-      auteur: 'bot',
-      texte: "Bonjour ! Décrivez-moi vos symptômes et je vous orienterai vers le bon service. Ceci ne remplace pas un avis médical.",
-    },
-  ]);
+  messages = signal<MessageChat[]>([]);
 
   toggleOuvert(): void {
     this.ouvert.update((v) => !v);
@@ -40,11 +40,19 @@ export class ChatbotComponent {
     const texte = this.saisie().trim();
     if (!texte || this.enCours()) return;
 
+    const historique: HistoriqueChatMessage[] = this.messages()
+      .filter((message) => message.texte !== "Une erreur est survenue, réessayez dans un instant.")
+      .slice(-6)
+      .map((message) => ({
+        role: message.auteur === 'patient' ? 'patient' : 'assistant',
+        texte: message.texte.slice(0, 500),
+      }));
+
     this.messages.update((liste) => [...liste, { auteur: 'patient', texte }]);
     this.saisie.set('');
     this.enCours.set(true);
 
-    this.chatbotService.orienter(texte).subscribe({
+    this.chatbotService.orienter(texte, historique).subscribe({
       next: (res) => {
         this.messages.update((liste) => [
           ...liste,

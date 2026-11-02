@@ -93,8 +93,12 @@
         <textarea formControlName="notes" rows="2" placeholder="Informations supplémentaires que vous souhaitez communiquer au médecin..."></textarea>
       </div>
 
+      @if (medecin()?.service?.tarif) {
+        <p class="tarif-info">Montant à payer : {{ medecin()?.service?.tarif }} FCFA</p>
+      }
+
       <button type="submit" class="btn-submit" [disabled]="submitting()">
-        {{ submitting() ? 'Envoi en cours...' : 'Confirmer le rendez-vous' }}
+        {{ submitting() ? 'Envoi en cours...' : 'Procéder au paiement' }}
       </button>
 
     </form>

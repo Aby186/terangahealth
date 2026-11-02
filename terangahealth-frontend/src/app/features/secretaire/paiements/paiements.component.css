@@ -1,0 +1,178 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.page-header h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+  color: #0f2a3d;
+}
+
+.page-header p {
+  margin: 0 0 24px;
+  color: #51697a;
+}
+
+.error-box {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: #fdecec;
+  color: #b42318;
+}
+
+.state-message {
+  padding: 24px;
+  border-radius: 14px;
+  background: #fff;
+  color: #51697a;
+  text-align: center;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 260px;
+  max-width: 520px;
+  padding: 10px 16px;
+  border: 1px solid #cfe6e8;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.search-bar svg {
+  width: 18px;
+  height: 18px;
+  color: #51697a;
+  flex-shrink: 0;
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: #0f2a3d;
+}
+
+.resume {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 13px;
+  color: #51697a;
+}
+
+.resume strong {
+  font-size: 16px;
+  color: #0f7f87;
+}
+
+.paiements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.paiement-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(15, 42, 61, 0.05);
+}
+
+.paiement-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.paiement-info strong {
+  font-size: 16px;
+  color: #0f2a3d;
+}
+
+.paiement-info span {
+  font-size: 14px;
+  color: #51697a;
+}
+
+.paiement-info .ref {
+  font-size: 12px;
+  color: #8aa0ad;
+}
+
+.paiement-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.montant {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f2a3d;
+}
+
+.statut {
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statut-paye {
+  background: #dff7e8;
+  color: #15803d;
+}
+
+.statut-en_attente {
+  background: #fff3cd;
+  color: #92400e;
+}
+
+.statut-echoue {
+  background: #fde2e2;
+  color: #b42318;
+}
+
+.date {
+  font-size: 13px;
+  color: #8aa0ad;
+}
+
+@media (max-width: 600px) {
+  .paiement-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .paiement-right {
+    align-items: flex-start;
+  }
+
+  .resume {
+    align-items: flex-start;
+  }
+}

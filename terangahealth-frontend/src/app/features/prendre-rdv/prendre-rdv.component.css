@@ -188,6 +188,17 @@ select:disabled {
 
 .field-error { color: #B42318; font-size: 12px; margin: 6px 0 0; }
 
+.tarif-info {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--teal-500, #1FAAB4);
+  text-align: center;
+  margin: 14px 0;
+  padding: 10px;
+  background: var(--teal-100, #D7F4F6);
+  border-radius: 10px;
+}
+
 .btn-submit {
   margin-top: 8px;
   align-self: center;

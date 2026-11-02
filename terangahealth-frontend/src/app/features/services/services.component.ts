@@ -1,5 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ServicesService, ServiceMedical } from '../../core/services.service';
 
 @Component({
@@ -11,6 +12,7 @@ import { ServicesService, ServiceMedical } from '../../core/services.service';
 })
 export class ServicesComponent implements OnInit {
   private servicesService = inject(ServicesService);
+  private router = inject(Router);
 
   services = signal<ServiceMedical[]>([]);
   loading = signal(true);
@@ -29,6 +31,18 @@ export class ServicesComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  // Étape suivante du parcours : lister les médecins du service choisi
+  voirMedecins(nomService: string): void {
+    this.router.navigate(['/medecins'], { queryParams: { service: nomService } });
+  }
+
+  // Prix de la consultation (champ « tarif » du service), formaté en FCFA
+  prix(service: ServiceMedical): string {
+    const tarif = Number((service as ServiceMedical & { tarif?: number | string }).tarif);
+    if (!tarif) return '';
+    return `${tarif.toLocaleString('fr-FR')} FCFA`;
   }
 
   accentClass(index: number): string {

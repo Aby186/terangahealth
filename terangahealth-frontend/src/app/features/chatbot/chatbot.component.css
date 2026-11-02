@@ -71,7 +71,6 @@
 }
 .chat-icon svg { width: 18px; height: 18px; color: #fff; }
 .chat-header-info strong { color: #fff; font-size: 13.5px; font-weight: 700; display: block; }
-.chat-header-info span { color: rgba(255,255,255,.8); font-size: 11px; }
 
 .btn-close {
   width: 28px; height: 28px;
@@ -143,6 +142,17 @@
   background: #fff;
   flex: none;
 }
+
+.chat-legal-note {
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink-300, #94A3B8);
+  padding: 8px 12px 12px;
+  background: #fff;
+  margin-top: 0;
+}
+
 .chat-input-row input {
   flex: 1;
   border: 1px solid var(--line);
@@ -174,4 +184,7 @@
 @media (max-width: 480px) {
   .chatbot-wrapper { bottom: 16px; right: 16px; }
   .chat-window { width: calc(100vw - 32px); height: calc(100vh - 120px); }
+  .chat-input-row { gap: 6px; padding: 10px; }
+  .chat-legal-note { padding-left: 10px; padding-right: 10px; }
+  .btn-envoyer { width: 36px; height: 36px; }
 }

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { UtilisateursService, UtilisateurItem } from '../../core/utilisateurs.service';
+import { MessageService, Conversation } from '../../core/message.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -14,10 +15,12 @@ import { UtilisateursService, UtilisateurItem } from '../../core/utilisateurs.se
 export class AdminLayoutComponent implements OnInit {
   auth = inject(AuthService);
   private utilisateursService = inject(UtilisateursService);
+  private messageService = inject(MessageService);
 
   menuOuvert = signal(false);
   sidebarReduite = signal(false);
   utilisateurs = signal<UtilisateurItem[]>([]);
+  conversations = signal<Conversation[]>([]);
 
   nombreNotifications = computed(() => {
     const septJoursAvant = new Date();
@@ -29,9 +32,16 @@ export class AdminLayoutComponent implements OnInit {
     }).length;
   });
 
+  nombreMessagesNonLus = computed(() =>
+    this.conversations().reduce((total, c) => total + c.non_lus, 0)
+  );
+
   ngOnInit(): void {
     this.utilisateursService.lister().subscribe({
       next: (data) => this.utilisateurs.set(data),
+    });
+    this.messageService.conversations().subscribe({
+      next: (data) => this.conversations.set(data),
     });
   }
 

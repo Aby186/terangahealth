@@ -56,6 +56,10 @@ export class PlanningService {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/creneaux/${creneauId}`);
   }
 
+  bloquerCreneau(creneauId: number): Observable<{ message: string; creneau: CreneauPlanning; a_reprogrammer: boolean }> {
+    return this.http.put<{ message: string; creneau: CreneauPlanning; a_reprogrammer: boolean }>(`${this.apiUrl}/creneaux/${creneauId}/bloquer`, {});
+  }
+
   supprimerPlanning(planningId: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/plannings/${planningId}`);
   }

@@ -1,0 +1,56 @@
+:host { display: block; }
+
+.page { max-width: 900px; padding: 40px 40px 80px; }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #4B5563; font-size: 13.5px; font-weight: 600;
+  text-decoration: none; margin-bottom: 20px;
+}
+.back-link svg { width: 16px; height: 16px; }
+.back-link:hover { color: #1FAAB4; }
+
+.page-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.page-header h1 { font-size: 28px; font-weight: 700; color: #0F172A; margin: 0 0 6px; }
+.page-header p { font-size: 14.5px; color: #4B5563; margin: 0; }
+
+.btn-rdv {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #1FAAB4; color: #fff; text-decoration: none;
+  padding: 12px 22px; border-radius: 999px; font-size: 14px; font-weight: 700;
+  transition: background .2s;
+}
+.btn-rdv:hover { background: #17939C; }
+.btn-rdv svg { width: 16px; height: 16px; }
+
+.state-message {
+  background: #fff; border: 1px solid #E6EEF9; border-radius: 14px;
+  padding: 28px; text-align: center; color: #4B5563; font-size: 14px;
+}
+.state-message.error { background: #FEF2F2; border-color: #FECACA; color: #B42318; }
+
+.jours-list { display: flex; flex-direction: column; gap: 14px; }
+
+.jour-card {
+  background: #fff; border: 1px solid #E6EEF9; border-radius: 16px;
+  padding: 18px 22px; box-shadow: 0 4px 14px rgba(14, 93, 100, .05);
+}
+.jour-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.jour-head h3 { font-size: 16px; font-weight: 700; color: #0F172A; margin: 0; text-transform: capitalize; }
+.count {
+  font-size: 11.5px; font-weight: 600; color: #0E6E75;
+  background: #D7F4F6; border-radius: 999px; padding: 3px 10px;
+}
+
+.creneaux { display: flex; flex-wrap: wrap; gap: 8px; }
+.creneau {
+  padding: 8px 16px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+  background: #F1FBFC; color: #0E6E75; border: 1px solid #CFEFF2;
+}
+
+@media (max-width: 600px) {
+  .page { padding: 28px 18px 60px; }
+}

@@ -2,12 +2,6 @@
 
 return [
 
- 'twilio' => [
-        'sid' => env('TWILIO_SID'),
-        'auth_token' => env('TWILIO_AUTH_TOKEN'),
-        'from' => env('TWILIO_FROM'),
-    ],
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -41,9 +35,30 @@ return [
         ],
     ],
 
-    'smsto' => [
-        'api_key' => env('SMSTO_API_KEY'),
-        'sender_id' => env('SMSTO_SENDER_ID', 'TerangaHealth'),
+    'paydunya' => [
+        'master_key'  => env('PAYDUNYA_MASTER_KEY'),
+        'public_key'  => env('PAYDUNYA_PUBLIC_KEY'),
+        'private_key' => env('PAYDUNYA_PRIVATE_KEY'),
+        'token'       => env('PAYDUNYA_TOKEN'),
+        'mode'        => env('PAYDUNYA_MODE', 'test'),
+    ],
+
+    'soynade' => [
+        'api_key'  => env('SOYNADE_API_KEY'),
+        'base_url' => env('SOYNADE_BASE_URL', 'https://api.soynade.ai'),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model'   => env('GEMINI_MODEL', 'gemini-flash-latest'),
+    ],
+
+    'orange_sms' => [
+        'driver'         => env('SMS_DRIVER', 'log'),
+        'client_id'      => env('ORANGE_SMS_CLIENT_ID'),
+        'client_secret'  => env('ORANGE_SMS_CLIENT_SECRET'),
+        'sender_name'    => env('ORANGE_SMS_SENDER_NAME', 'TerangaRDV'),
+        'sender_address' => env('ORANGE_SMS_SENDER_ADDRESS', 'tel:+2210000'),
     ],
 
 ];

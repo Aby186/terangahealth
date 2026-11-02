@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, Validati
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
+import { RouterLink } from '@angular/router';
 
 function passwordsMatch(control: AbstractControl): ValidationErrors | null {
   const pass = control.get('password')?.value;
@@ -14,7 +15,7 @@ function passwordsMatch(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-auth',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './auth.component.html',
   styleUrl: './auth.component.css',
 })
@@ -28,6 +29,8 @@ export class AuthComponent implements OnInit {
   loading = signal(false);
   errorMessage = signal<string | null>(null);
   showPassword = signal(false);
+  showRegisterPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   ngOnInit(): void {
     if (this.route.snapshot.queryParamMap.get('tab') === 'register') {
@@ -62,6 +65,14 @@ export class AuthComponent implements OnInit {
 
   toggleShowPassword(): void {
     this.showPassword.update((v) => !v);
+  }
+
+  toggleShowRegisterPassword(): void {
+    this.showRegisterPassword.update((v) => !v);
+  }
+
+  toggleShowConfirmPassword(): void {
+    this.showConfirmPassword.update((v) => !v);
   }
 
   submitLogin(): void {

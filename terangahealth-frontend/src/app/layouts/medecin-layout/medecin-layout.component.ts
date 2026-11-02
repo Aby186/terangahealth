@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { RendezVousService, RendezVousItem } from '../../core/rendez-vous.service';
+import { MessageService, Conversation } from '../../core/message.service';
 
 @Component({
   selector: 'app-medecin-layout',
@@ -13,19 +13,19 @@ import { RendezVousService, RendezVousItem } from '../../core/rendez-vous.servic
 })
 export class MedecinLayoutComponent implements OnInit {
   auth = inject(AuthService);
-  private rendezVousService = inject(RendezVousService);
+  private messageService = inject(MessageService);
 
   menuOuvert = signal(false);
   sidebarReduite = signal(false);
-  rendezVous = signal<RendezVousItem[]>([]);
+  conversations = signal<Conversation[]>([]);
 
-  nombreNotifications = computed(() =>
-    this.rendezVous().filter((r) => r.status === 'en_attente').length
+  nombreMessagesNonLus = computed(() =>
+    this.conversations().reduce((total, c) => total + c.non_lus, 0)
   );
 
   ngOnInit(): void {
-    this.rendezVousService.lister().subscribe({
-      next: (data) => this.rendezVous.set(data),
+    this.messageService.conversations().subscribe({
+      next: (data) => this.conversations.set(data),
     });
   }
 

@@ -4,6 +4,15 @@
     <p>Bienvenue {{ nomComplet() }}</p>
   </div>
 
+  @if (totalAReprogrammer() > 0) {
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border:1px solid #fdba74;background:#fff7ed;border-radius:14px;color:#9a5b00;margin-bottom:18px;">
+      <strong>{{ totalAReprogrammer() }} rendez-vous à reprogrammer</strong>
+      <a routerLink="/secretaire/rendez-vous" [queryParams]="{ filtre: 'reprogrammation' }" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:999px;background:#f59e0b;color:#fff;font-weight:700;text-decoration:none;">
+        Voir
+      </a>
+    </div>
+  }
+
   <div class="cards-fonctionnalites">
     <a routerLink="/secretaire/demandes" class="carte-fonction mise-en-avant">
       <div class="icone bleu">

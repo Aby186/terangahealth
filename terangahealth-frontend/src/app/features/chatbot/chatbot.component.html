@@ -9,7 +9,6 @@
           </div>
           <div>
             <strong>Assistant TerangaHealth</strong>
-            <span>Orientation vers le bon service</span>
           </div>
         </div>
         <button class="btn-close" (click)="toggleOuvert()" aria-label="Fermer">
@@ -47,7 +46,6 @@
       <div class="chat-input-row">
         <input
           type="text"
-          placeholder="Décrivez vos symptômes..."
           [(ngModel)]="saisie"
           (keyup.enter)="envoyer()"
           [disabled]="enCours()"
@@ -56,6 +54,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </button>
       </div>
+      <div class="chat-legal-note">Ceci ne remplace pas un avis médical.</div>
     </div>
   }
 

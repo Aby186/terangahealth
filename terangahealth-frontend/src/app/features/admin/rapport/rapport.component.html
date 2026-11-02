@@ -1,54 +1,132 @@
 <div class="page">
+
   <div class="page-header-box">
-    <h1>Rapport d'activité</h1>
-    <p>Vue analytique de l'activité de la plateforme.</p>
+    <div>
+      <h1>Tableau de bord</h1>
+      <p>Suivi de l'activité de la clinique sur la période choisie.</p>
+    </div>
+    <div class="header-actions">
+      <div class="periodes">
+        @for (p of periodes; track p.valeur) {
+          <button type="button" class="chip" [class.active]="periode() === p.valeur" (click)="choisirPeriode(p.valeur)">
+            {{ p.libelle }}
+          </button>
+        }
+      </div>
+      <button type="button" class="btn-export" (click)="exporterCsv()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M4 20h16" /></svg>
+        Exporter (CSV)
+      </button>
+    </div>
   </div>
 
   @if (!loading()) {
+
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-value">{{ totalRdv() }}</div>
         <div class="stat-label">Total rendez-vous</div>
       </div>
-      <div class="stat-card stat-danger">
-        <div class="stat-value">{{ tauxAbsences() }}%</div>
-        <div class="stat-label">Taux d'annulation</div>
+      <div class="stat-card">
+        <div class="stat-value">{{ confirmes() }}</div>
+        <div class="stat-label">Confirmés</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">{{ totalAnnules() }}</div>
-        <div class="stat-label">Rendez-vous annulés</div>
+        <div class="stat-value">{{ enAttente() }}</div>
+        <div class="stat-label">En attente</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ annules() }}</div>
+        <div class="stat-label">Annulés</div>
+        <div class="stat-sub">{{ tauxAnnulation() }} % des rendez-vous</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ urgents() }}</div>
+        <div class="stat-label">Cas urgents</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ patientsSuivis() }}</div>
+        <div class="stat-label">Patients suivis</div>
       </div>
     </div>
 
     <div class="panel">
-      <h3>Tendance des consultations (12 derniers mois)</h3>
+      <h3>Consultations par mois</h3>
       <div class="bar-chart">
-        @for (s of tendanceMensuelle(); track s.mois) {
-          <div class="bar-col">
-            <div class="bar" [style.height.%]="hauteurBarre(s.total)">
-              <span class="bar-value">{{ s.total }}</span>
+        @for (s of tendanceMensuelle(); track s.cle) {
+          <div class="bar-col" [class.courant]="s.courant">
+            <div class="bar-zone">
+              @if (s.total > 0) {
+                <div class="bar" [style.height.%]="hauteurBarre(s.total)">
+                  <span class="bar-value">{{ s.total }}</span>
+                </div>
+              } @else {
+                <span class="bar-zero">0</span>
+              }
             </div>
-            <span class="bar-label">{{ s.mois }}</span>
+            <span class="bar-label">{{ s.libelle }}</span>
           </div>
         }
       </div>
     </div>
 
     <div class="panel">
-      <h3>Spécialités les plus demandées</h3>
-      <div class="specialites-list">
-        @for (s of specialitesDemandees(); track s.nom) {
-          <div class="specialite-row">
-            <span class="specialite-nom">{{ s.nom }}</span>
-            <div class="specialite-bar-track">
-              <div class="specialite-bar-fill" [style.width.%]="s.pourcentage"></div>
-            </div>
-            <span class="specialite-total">{{ s.total }} ({{ s.pourcentage }}%)</span>
+      <h3>Répartition par statut</h3>
+      <div class="statut-bar">
+        @for (s of statuts(); track s.cle) {
+          @if (s.total > 0) {
+            <div class="statut-seg" [ngClass]="s.classe" [style.width.%]="s.pourcentage"></div>
+          }
+        }
+      </div>
+      <div class="statut-legende">
+        @for (s of statuts(); track s.cle) {
+          <div class="legende-item">
+            <span class="point" [ngClass]="s.classe"></span>
+            <span>{{ s.libelle }}</span>
+            <strong>{{ s.total }}</strong>
+            <span class="pct">({{ s.pourcentage }} %)</span>
           </div>
         }
       </div>
     </div>
+
+    <div class="deux-colonnes">
+      <div class="panel">
+        <h3>Spécialités les plus demandées</h3>
+        @if (specialitesDemandees().length === 0) {
+          <p class="vide">Aucun rendez-vous sur cette période.</p>
+        }
+        <div class="liste-barres">
+          @for (s of specialitesDemandees(); track s.nom) {
+            <div class="ligne-barre">
+              <span class="ligne-nom">{{ s.nom }}</span>
+              <div class="track"><div class="fill" [style.width.%]="s.pourcentage"></div></div>
+              <span class="ligne-total">{{ s.total }} ({{ s.pourcentage }} %)</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Médecins les plus sollicités</h3>
+        @if (medecinsSollicites().length === 0) {
+          <p class="vide">Aucun rendez-vous sur cette période.</p>
+        }
+        <div class="liste-barres">
+          @for (m of medecinsSollicites(); track m.nom) {
+            <div class="ligne-barre">
+              <span class="ligne-nom">{{ m.nom }}</span>
+              <div class="track"><div class="fill fill-navy" [style.width.%]="m.pourcentage"></div></div>
+              <span class="ligne-total">{{ m.total }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
   } @else {
     <div class="state-message">Chargement des données...</div>
   }
+
 </div>

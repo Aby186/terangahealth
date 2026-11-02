@@ -6,6 +6,7 @@ use App\Models\RendezVous;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Str;
 
 class RappelRendezVous extends Notification
 {
@@ -25,66 +26,37 @@ class RappelRendezVous extends Notification
     {
         $rdv = $this->rendezVous;
         $dateFormatee = \Carbon\Carbon::parse($rdv->date_rendez_vous)->locale('fr')->isoFormat('dddd D MMMM YYYY');
-
-        $lienAnnulation = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-            'rendezvous.annuler.lien',
-            now()->addDays(3),
-            ['rendezVous' => $rdv->id]
-        );
+        $heure = substr($rdv->heure_rendez_vous, 0, 5);
 
         return (new MailMessage)
-            ->subject($this->sujet())
+            ->subject("Rappel : votre rendez-vous du {$dateFormatee} a {$heure}")
             ->greeting('Bonjour ' . $notifiable->prenom . ',')
-            ->line($this->introduction())
+            ->line('Nous vous rappelons votre prochain rendez-vous a la clinique.')
             ->line("**Médecin :** Dr {$rdv->medecin->prenom} {$rdv->medecin->nom}")
             ->line("**Date :** {$dateFormatee}")
-            ->line("**Heure :** " . substr($rdv->heure_rendez_vous, 0, 5))
+            ->line("**Heure :** {$heure}")
             ->line("**Motif :** {$rdv->motif}")
-            ->line('Merci de vous présenter quelques minutes avant l\'heure prévue.')
-            ->action('Annuler ce rendez-vous', $lienAnnulation)
-            ->line('Si vous ne pouvez plus vous rendre à ce rendez-vous, merci de l\'annuler dès que possible pour libérer le créneau à un autre patient.')
-            ->salutation('L\'équipe TerangaHealth — Clinique Elok Cardiologie');
+            ->line('Nous vous remercions de vous présenter quelques minutes avant l\'heure prévue, afin que votre accueil se passe dans les meilleures conditions.')
+            ->line('Toute l\'équipe de la Clinique Elok Cardiologie vous souhaite une excellente consultation.')
+            ->salutation('Cordialement, l\'équipe TerangaHealth — Clinique Elok Cardiologie');
     }
 
     public function toSmsTo(object $notifiable): string
     {
         $rdv = $this->rendezVous;
         $heure = substr($rdv->heure_rendez_vous, 0, 5);
-        $dateFormatee = \Carbon\Carbon::parse($rdv->date_rendez_vous)->locale('fr')->isoFormat('D MMMM');
+        $date = \Carbon\Carbon::parse($rdv->date_rendez_vous)->locale('fr')->isoFormat('dddd D MMMM');
 
-        $lienAnnulation = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-            'rendezvous.annuler.lien',
-            now()->addDays(3),
-            ['rendezVous' => $rdv->id]
-        );
+        $lignes = [
+            "Bonjour {$notifiable->prenom},",
+            '',
+            "Rappel de votre rendez-vous avec le Docteur {$rdv->medecin->nom} {$date} a {$heure}.",
+            '',
+            'A bientot et bonne consultation.',
+            'TerangaHealth',
+        ];
 
-        $intro = match ($this->delai) {
-            '48h'   => "RDV avec Dr {$rdv->medecin->nom} le {$dateFormatee} à {$heure} (dans 48h).",
-            '24h'   => "Rappel - RDV demain avec Dr {$rdv->medecin->nom} à {$heure}.",
-            'jourj' => "Votre RDV avec Dr {$rdv->medecin->nom} est aujourd'hui à {$heure}.",
-            '2h'    => "Votre RDV avec Dr {$rdv->medecin->nom} est dans 2h ({$heure}).",
-        };
-
-        return "TerangaHealth: {$intro} Annuler: {$lienAnnulation}";
-    }
-
-    private function sujet(): string
-    {
-        return match ($this->delai) {
-            '48h'   => 'Rappel : rendez-vous dans 48 heures',
-            '24h'   => 'Rappel : rendez-vous demain',
-            'jourj' => 'Rappel : votre rendez-vous est aujourd\'hui',
-            '2h'    => 'Rappel : votre rendez-vous dans 2 heures',
-        };
-    }
-
-    private function introduction(): string
-    {
-        return match ($this->delai) {
-            '48h'   => 'Nous vous rappelons que vous avez un rendez-vous dans 48 heures.',
-            '24h'   => 'Nous vous rappelons que vous avez un rendez-vous demain.',
-            'jourj' => 'Nous vous rappelons que vous avez un rendez-vous aujourd\'hui.',
-            '2h'    => 'Votre rendez-vous approche, il est prévu dans 2 heures.',
-        };
+        // Str::ascii supprime les retours a la ligne : on convertit ligne par ligne.
+        return implode("\n", array_map(fn ($ligne) => Str::ascii($ligne), $lignes));
     }
 }

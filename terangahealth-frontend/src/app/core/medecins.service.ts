@@ -17,6 +17,7 @@ export interface Medecin {
     nom: string;
     description: string;
     duree_consultation: number;
+    tarif: number;
   } | null;
 }
 

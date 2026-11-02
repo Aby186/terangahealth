@@ -1,0 +1,44 @@
+<div class="page">
+  <div class="card">
+
+    @if (verification()) {
+      <div class="spinner"></div>
+      <h1>Vérification du paiement...</h1>
+      <p>Merci de patienter pendant que nous confirmons votre paiement.</p>
+    } @else if (paiement()?.statut === 'paye') {
+      <div class="icon icon-success">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 12l3 3 5-6" /></svg>
+      </div>
+      <h1>Paiement confirmé</h1>
+      <p>Votre rendez-vous a bien été créé. Vous pouvez le consulter dans « Mes rendez-vous ».</p>
+
+      @if (factureEnCours()) {
+        <p>Préparation de la facture…</p>
+      } @else if (factureErreur()) {
+        <p>{{ factureErreur() }}</p>
+      } @else {
+        <button type="button" class="btn-primary" (click)="ouvrirFacture()">Télécharger ma facture</button>
+      }
+
+      <div class="actions">
+        <a routerLink="/mes-rendez-vous" class="btn-primary">Voir mes rendez-vous</a>
+      </div>
+    } @else {
+      <div class="icon icon-pending">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M12 7v5l3 3" /></svg>
+      </div>
+      <h1>Paiement en attente de confirmation</h1>
+      <p>
+        Si vous venez de payer, la confirmation peut prendre quelques instants.
+        Sinon, le paiement a peut-être été annulé ou a échoué.
+      </p>
+      <div class="actions">
+        <button class="btn-secondary" (click)="verifier()">Vérifier à nouveau</button>
+        <a routerLink="/prendre-rdv" class="btn-primary">Reprendre rendez-vous</a>
+      </div>
+    }
+
+  </div>
+</div>
+
+<app-facture [paiement]="facturePaiement()" [open]="factureOuverte()" (close)="factureOuverte.set(false)" />

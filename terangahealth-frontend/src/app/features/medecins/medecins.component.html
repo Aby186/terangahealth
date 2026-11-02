@@ -1,22 +1,36 @@
 <div class="page">
 
+  @if (serviceChoisi()) {
+    <a routerLink="/services" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+      Tous les services
+    </a>
+  }
+
   <div class="page-header">
-    <h1>Nos médecins</h1>
-    <p>Choisissez un médecin pour consulter ses disponibilités et prendre rendez-vous.</p>
+    @if (serviceChoisi()) {
+      <h1>Médecins — {{ serviceChoisi() }}</h1>
+      <p>Choisissez un médecin pour consulter son planning, puis prendre rendez-vous.</p>
+    } @else {
+      <h1>Nos médecins</h1>
+      <p>Choisissez un médecin pour consulter son planning, puis prendre rendez-vous.</p>
+    }
   </div>
 
   <div class="search-bar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
-    <input type="text" placeholder="Rechercher par nom ou spécialité..." [(ngModel)]="recherche" />
+    <input type="text" placeholder="Rechercher un médecin..." [(ngModel)]="recherche" />
   </div>
 
-  <div class="filter-row">
-    @for (specialite of specialites(); track specialite) {
-      <button class="filter-chip" [class.active]="specialiteActive() === specialite" (click)="selectSpecialite(specialite)">
-        {{ specialite }}
-      </button>
-    }
-  </div>
+  @if (!serviceChoisi()) {
+    <div class="filter-row">
+      @for (specialite of specialites(); track specialite) {
+        <button class="filter-chip" [class.active]="specialiteActive() === specialite" (click)="selectSpecialite(specialite)">
+          {{ specialite }}
+        </button>
+      }
+    </div>
+  }
 
   @if (loading()) {
     <div class="state-message">Chargement des médecins...</div>
@@ -26,6 +40,8 @@
     <div class="state-message">
       @if (recherche()) {
         Aucun médecin ne correspond à "{{ recherche() }}".
+      } @else if (serviceChoisi()) {
+        Aucun médecin disponible pour ce service pour le moment.
       } @else {
         Aucun médecin disponible pour le moment.
       }
@@ -72,12 +88,8 @@
         }
 
         <div class="card-actions">
-          <button class="btn-planning" (click)="prendreRdv(medecin.id)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
-            Planning
-          </button>
-          <button class="btn-rdv" (click)="prendreRdv(medecin.id)">
-            Prendre RDV
+          <button class="btn-rdv" (click)="voirPlanning(medecin.id)">
+            Consulter le planning
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           </button>
         </div>

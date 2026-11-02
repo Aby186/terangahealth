@@ -13,6 +13,7 @@ class Service extends Model
         'nom',
         'description',
         'duree_consultation',
+        'tarif',
     ];
 
     public function medecins()

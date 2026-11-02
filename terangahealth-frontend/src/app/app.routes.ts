@@ -12,6 +12,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/auth.component').then(m => m.AuthComponent),
   },
   {
+    path: 'mot-de-passe-oublie',
+    loadComponent: () => import('./features/mot-de-passe/mot-de-passe-oublie.component').then(m => m.MotDePasseOublieComponent),
+  },
+  {
+    path: 'nouveau-mot-de-passe',
+    loadComponent: () => import('./features/mot-de-passe/nouveau-mot-de-passe.component').then(m => m.NouveauMotDePasseComponent),
+  },
+  {
     path: '',
     loadComponent: () => import('./layouts/patient-layout/patient-layout.component').then(m => m.PatientLayoutComponent),
     children: [
@@ -23,6 +31,11 @@ export const routes: Routes = [
         path: 'medecins',
         canActivate: [authGuard, roleGuard(['patient'])],
         loadComponent: () => import('./features/medecins/medecins.component').then(m => m.MedecinsComponent),
+      },
+      {
+        path: 'medecins/:medecinId/planning',
+        canActivate: [authGuard, roleGuard(['patient'])],
+        loadComponent: () => import('./features/planning-medecin/planning-medecin.component').then(m => m.PlanningMedecinComponent),
       },
       {
         path: 'prendre-rdv',
@@ -40,6 +53,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/mes-rendez-vous/mes-rendez-vous.component').then(m => m.MesRendezVousComponent),
       },
       {
+        path: 'mes-paiements',
+        canActivate: [authGuard, roleGuard(['patient'])],
+        loadComponent: () => import('./features/mes-paiements/mes-paiements.component').then(m => m.MesPaiementsComponent),
+      },
+      {
         path: 'profil',
         canActivate: [authGuard, roleGuard(['patient'])],
         loadComponent: () => import('./features/profil/profil.component').then(m => m.ProfilComponent),
@@ -52,6 +70,16 @@ export const routes: Routes = [
         path: 'rappels',
         canActivate: [authGuard, roleGuard(['patient'])],
         loadComponent: () => import('./features/rappels/rappels.component').then(m => m.RappelsComponent),
+      },
+      {
+        path: 'messages',
+        canActivate: [authGuard, roleGuard(['patient'])],
+        loadComponent: () => import('./features/messagerie/messagerie.component').then(m => m.MessagerieComponent),
+      },
+      {
+        path: 'paiement/retour',
+        canActivate: [authGuard, roleGuard(['patient'])],
+        loadComponent: () => import('./features/paiement-retour/paiement-retour.component').then(m => m.PaiementRetourComponent),
       },
     ],
   },
@@ -86,8 +114,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/secretaire/planning/planning.component').then(m => m.GestionPlanningComponent),
       },
       {
+        path: 'paiements',
+        loadComponent: () => import('./features/secretaire/paiements/paiements.component').then(m => m.SecretairePaiementsComponent),
+      },
+      {
         path: 'profil',
         loadComponent: () => import('./features/secretaire/profil/profil.component').then(m => m.SecretaireProfilComponent),
+      },
+      {
+        path: 'messages',
+        loadComponent: () => import('./features/messagerie/messagerie.component').then(m => m.MessagerieComponent),
       },
     ],
   },
@@ -125,6 +161,10 @@ export const routes: Routes = [
         path: 'profil',
         loadComponent: () => import('./features/medecin/profil/profil.component').then(m => m.MedecinProfilComponent),
       },
+      {
+        path: 'messages',
+        loadComponent: () => import('./features/messagerie/messagerie.component').then(m => m.MessagerieComponent),
+      },
     ],
   },
   {
@@ -158,13 +198,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/rapport/rapport.component').then(m => m.AdminRapportComponent),
       },
       {
-        path: 'securite',
-        loadComponent: () => import('./features/admin/securite/securite.component').then(m => m.AdminSecuriteComponent),
-      },
-
-      {
         path: 'profil',
         loadComponent: () => import('./features/admin/profil/profil.component').then(m => m.AdminProfilComponent),
+      },
+      {
+        path: 'messages',
+        loadComponent: () => import('./features/messagerie/messagerie.component').then(m => m.MessagerieComponent),
       },
     ],
   },

@@ -2,7 +2,7 @@
 
   <div class="page-header">
     <h1>Mon profil</h1>
-    <p>Consultez vos informations personnelles.</p>
+    <p>Consultez et mettez à jour vos informations personnelles.</p>
   </div>
 
   @if (auth.currentUser(); as user) {
@@ -17,29 +17,167 @@
         </div>
       </div>
 
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="label">Email</span>
-          <span class="value">{{ user.email }}</span>
+      @if (modeEdition()) {
+        <div class="form-grid">
+          <div class="field">
+            <label for="prenom">Prénom</label>
+            <input id="prenom" type="text" class="input-field" [value]="form().prenom" (input)="saisirChamp('prenom', $event)" [class.invalid]="validationErrors()['prenom']" />
+            @if (validationErrors()['prenom']) {
+              <small class="field-error">{{ validationErrors()['prenom'][0] }}</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="nom">Nom</label>
+            <input id="nom" type="text" class="input-field" [value]="form().nom" (input)="saisirChamp('nom', $event)" [class.invalid]="validationErrors()['nom']" />
+            @if (validationErrors()['nom']) {
+              <small class="field-error">{{ validationErrors()['nom'][0] }}</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" class="input-field" [value]="form().email" (input)="saisirChamp('email', $event)" [class.invalid]="validationErrors()['email']" />
+            @if (validationErrors()['email']) {
+              <small class="field-error">{{ validationErrors()['email'][0] }}</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="telephone">Téléphone</label>
+            <input id="telephone" type="text" class="input-field" [value]="form().telephone" (input)="saisirChamp('telephone', $event)" [class.invalid]="validationErrors()['telephone']" />
+            @if (validationErrors()['telephone']) {
+              <small class="field-error">{{ validationErrors()['telephone'][0] }}</small>
+            }
+          </div>
+
+          <div class="field full-width">
+            <label for="adresse">Adresse</label>
+            <input id="adresse" type="text" class="input-field" [value]="form().adresse" (input)="saisirChamp('adresse', $event)" [class.invalid]="validationErrors()['adresse']" />
+            @if (validationErrors()['adresse']) {
+              <small class="field-error">{{ validationErrors()['adresse'][0] }}</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="date_naissance">Date de naissance</label>
+            <input id="date_naissance" type="date" class="input-field" [value]="form().date_naissance" (input)="saisirChamp('date_naissance', $event)" [class.invalid]="validationErrors()['date_naissance']" />
+            @if (validationErrors()['date_naissance']) {
+              <small class="field-error">{{ validationErrors()['date_naissance'][0] }}</small>
+            }
+          </div>
+
+          <div class="field">
+            <label for="sexe">Sexe</label>
+            <select id="sexe" class="input-field" [value]="form().sexe" (change)="saisirChamp('sexe', $event)" [class.invalid]="validationErrors()['sexe']">
+              <option value="">Sélectionnez</option>
+              <option value="homme">Homme</option>
+              <option value="femme">Femme</option>
+            </select>
+            @if (validationErrors()['sexe']) {
+              <small class="field-error">{{ validationErrors()['sexe'][0] }}</small>
+            }
+          </div>
         </div>
 
-        @if (user.telephone) {
-          <div class="info-item">
-            <span class="label">Téléphone</span>
-            <span class="value">{{ user.telephone }}</span>
-          </div>
+        @if (erreurProfil()) {
+          <div class="error-box">{{ erreurProfil() }}</div>
         }
 
-        <div class="info-item">
-          <span class="label">Rôle</span>
-          <span class="value">Patient</span>
+        <div class="edit-actions">
+          <button class="btn-secondary" type="button" (click)="annulerEdition()" [disabled]="enCours()">Annuler</button>
+          <button class="btn-primary" type="button" (click)="enregistrerProfil()" [disabled]="enCours()">{{ enCours() ? 'Enregistrement...' : 'Enregistrer' }}</button>
+        </div>
+      } @else {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Prénom</span>
+            <span class="value">{{ user.prenom }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Nom</span>
+            <span class="value">{{ user.nom }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="label">Email</span>
+            <span class="value">{{ user.email }}</span>
+          </div>
+
+          @if (user.telephone) {
+            <div class="info-item">
+              <span class="label">Téléphone</span>
+              <span class="value">{{ user.telephone }}</span>
+            </div>
+          }
+
+          @if (user.adresse) {
+            <div class="info-item">
+              <span class="label">Adresse</span>
+              <span class="value">{{ user.adresse }}</span>
+            </div>
+          }
+
+          @if (user.date_naissance) {
+            <div class="info-item">
+              <span class="label">Date de naissance</span>
+              <span class="value">{{ user.date_naissance }}</span>
+            </div>
+          }
+
+          @if (user.sexe) {
+            <div class="info-item">
+              <span class="label">Sexe</span>
+              <span class="value">{{ user.sexe === 'homme' ? 'Homme' : 'Femme' }}</span>
+            </div>
+          }
+
+          <div class="info-item">
+            <span class="label">Rôle</span>
+            <span class="value">Patient</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <button class="btn-primary" type="button" (click)="activerEdition()">Modifier mes informations</button>
+        </div>
+
+        <p class="note">Mettez à jour vos informations personnelles à tout moment.</p>
+      }
+
+      @if (successMessage()) {
+        <div class="success-box">{{ successMessage() }}</div>
+      }
+    </div>
+
+    @if (user.role === 'patient') {
+      <div class="danger-card">
+        <div class="danger-content">
+          <h3>Fermer mon compte</h3>
+          <p>La fermeture de votre compte est définitive. Les rendez-vous à venir seront annulés, vos messages et connexions supprimés, et vos données personnelles seront anonymisées.</p>
+        </div>
+        <div class="danger-actions">
+          <button class="btn-danger" (click)="ouvrirDialogue()">Fermer mon compte</button>
         </div>
       </div>
 
-      <p class="note">
-        Pour modifier ces informations, contacte le secrétariat de la clinique.
-      </p>
-    </div>
+      @if (dialogueOuvert()) {
+        <div class="overlay" role="presentation" (click)="fermerDialogue()"></div>
+        <div class="dialogue" role="dialog" aria-modal="true">
+          <h4>Confirmer la fermeture</h4>
+          <p>Veuillez saisir votre mot de passe pour confirmer la fermeture de votre compte.</p>
+          <input type="password" placeholder="Mot de passe" [value]="motDePasse()" (input)="saisirMotDePasse($event)" (keyup.enter)="confirmerSuppression()" />
+          @if (erreur()) {
+            <div class="error-box small">{{ erreur() }}</div>
+          }
+          <div class="dialogue-actions">
+            <button class="btn-secondary" type="button" (click)="fermerDialogue()" [disabled]="enCours()">Annuler</button>
+            <button class="btn-danger" type="button" (click)="confirmerSuppression()" [disabled]="!motDePasse() || enCours()">{{ enCours() ? 'Fermeture…' : 'Fermer mon compte' }}</button>
+          </div>
+        </div>
+      }
+    }
   }
 
 </div>

@@ -1,0 +1,181 @@
+:host {
+  display: block;
+}
+
+.facture-dialog {
+  border: none;
+  padding: 0;
+  width: min(820px, calc(100vw - 32px));
+  background: transparent;
+}
+
+.facture-dialog::backdrop {
+  background: rgba(16, 38, 66, 0.45);
+}
+
+.facture-card {
+  background: #ffffff;
+  color: #102642;
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(16, 38, 66, 0.18);
+  padding: 32px 36px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+.facture-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(16, 38, 66, 0.12);
+}
+
+.facture-brand {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #102642;
+}
+
+.facture-title {
+  margin-top: 8px;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #102642;
+}
+
+.facture-badge {
+  border-radius: 999px;
+  background: rgba(31, 170, 180, 0.12);
+  color: #1FAAB4;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.facture-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+  margin-top: 26px;
+}
+
+.facture-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.96rem;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(16, 38, 66, 0.08);
+}
+
+.facture-row span {
+  color: rgba(16, 38, 66, 0.75);
+}
+
+.facture-row strong {
+  text-align: right;
+  font-weight: 700;
+}
+
+.facture-ligne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+  padding: 18px 0;
+  border-top: 1px solid rgba(16, 38, 66, 0.12);
+  border-bottom: 1px solid rgba(16, 38, 66, 0.12);
+  font-size: 1rem;
+}
+
+.facture-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 26px;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.facture-footer {
+  margin-top: 28px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(16, 38, 66, 0.8);
+}
+
+.facture-actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-print,
+.btn-close {
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem 1.3rem;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-print {
+  background: #102642;
+  color: #ffffff;
+}
+
+.btn-close {
+  background: rgba(16, 38, 66, 0.08);
+  color: #102642;
+}
+
+.btn-print:hover,
+.btn-close:hover {
+  transform: translateY(-1px);
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  :host {
+    display: block;
+    background: #ffffff;
+  }
+
+  .facture-dialog {
+    width: 100%;
+    max-width: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .facture-dialog::backdrop {
+    display: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .facture-card {
+    box-shadow: none;
+    border: 1px solid rgba(16, 38, 66, 0.12);
+    border-radius: 0;
+    padding: 0;
+  }
+}

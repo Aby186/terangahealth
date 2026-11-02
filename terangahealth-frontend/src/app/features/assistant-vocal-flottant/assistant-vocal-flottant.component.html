@@ -1,0 +1,127 @@
+<div class="assistant-vocal-flottant-wrapper">
+  @if (ouvert()) {
+    <div class="assistant-panel">
+      <div class="assistant-header">
+        <div>
+          <strong>Assistant vocal</strong>
+        </div>
+        <button class="btn-close" (click)="toggleOuvert()" aria-label="Fermer l'assistant vocal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+        </button>
+      </div>
+
+      @if (phase() === 'accueil') {
+        <div class="content-box accueil-box">
+          <h1>Assistant vocal</h1>
+          <p>Parle pour expliquer ton besoin et obtenir une aide rapide sur le bon service.</p>
+          <button class="primary-btn" (click)="demarrer()">Démarrer</button>
+        </div>
+      }
+
+      @if (phase() === 'envoi') {
+        <div class="content-box loading-box">
+          <div class="loader"></div>
+          <p>Je réfléchis…</p>
+        </div>
+      }
+
+      @if (phase() === 'pret' || phase() === 'ecoute') {
+        <div class="content-box recorder-box">
+          <div class="mic-wrapper">
+            <button
+              class="mic-btn"
+              [class.recording]="phase() === 'ecoute'"
+              [disabled]="!!urlPaiement()"
+              (click)="boutonMicroAction()"
+              aria-label="Assistant vocal en wolof"
+              [attr.aria-disabled]="!!urlPaiement()"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+                <path d="M5 11a7 7 0 0014 0M12 18v4M8 22h8"></path>
+              </svg>
+            </button>
+          </div>
+
+          @if (phase() === 'pret') {
+            <p class="micro-hint">Appuie pour parler</p>
+          } @else {
+            <p class="micro-hint recording-text">Je t'écoute… appuie pour terminer</p>
+          }
+
+          @if (comprisFr() || reponseWo() || reponseFr() || urlPaiement()) {
+            <div class="reponse-box">
+              @if (comprisFr()) {
+                <div class="reponse-line">
+                  <strong>Ce que j'ai compris :</strong>
+                  <span>{{ comprisFr() }}</span>
+                </div>
+              }
+
+              @if (reponseWo()) {
+                <div class="wo-text">{{ reponseWo() }}</div>
+              }
+
+              @if (reponseFr()) {
+                <div class="fr-text">{{ reponseFr() }}</div>
+              }
+
+              @if (urlPaiement()) {
+                <a
+                  [href]="urlPaiement() ?? '#'"
+                  (click)="$event.preventDefault(); ouvrirPaiement(urlPaiement())"
+                  style="display:inline-block; width:100%; margin-top:12px; padding:16px 20px; background:#0d6efd; color:#fff; border-radius:12px; text-align:center; text-decoration:none; font-weight:700; font-size:1rem;"
+                >
+                  Ouvrir le paiement
+                </a>
+              }
+
+              @if (dernierAudioBase64()) {
+                <button class="secondary-btn" (click)="reecouter()">Réécouter</button>
+              }
+            </div>
+          }
+
+          @if (urlPaiement()) {
+            <div style="margin-top: 12px; text-align: center;">
+              <button class="primary-btn" style="width: 100%;" [disabled]="true" aria-disabled="true">
+                Paiement en cours…
+              </button>
+            </div>
+          }
+
+          @if (creneaux().length) {
+            <div class="creneaux-block">
+              @for (creneau of creneaux(); track creneau.creneau_id) {
+                <button class="creneau-card" (click)="ouvrirCreneau(creneau)">
+                  <span class="date">{{ creneau.date }}</span>
+                  <span class="heure">{{ creneau.heure }}</span>
+                  <span class="medecin">Dr {{ creneau.medecin }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (phase() === 'erreur') {
+        <div class="content-box error-box">
+          <h2>Assistant vocal</h2>
+          <p>{{ messageErreur() || 'Un problème est survenu, réessaie' }}</p>
+          <button class="primary-btn" (click)="phase.set('accueil')">Réessayer</button>
+        </div>
+      }
+
+      <div class="assistant-footer">
+        <p>Ta voix est envoyée à un service externe pour être comprise. Ceci ne remplace pas un avis médical.</p>
+      </div>
+    </div>
+  }
+
+  <button class="floating-button" (click)="toggleOuvert()" aria-label="Assistant vocal en wolof">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="9" y="2" width="6" height="12" rx="3"></rect>
+      <path d="M5 11a7 7 0 0014 0M12 18v4M8 22h8"></path>
+    </svg>
+  </button>
+</div>

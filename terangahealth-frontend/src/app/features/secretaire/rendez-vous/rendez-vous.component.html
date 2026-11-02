@@ -8,6 +8,9 @@
   @if (errorMessage()) {
     <div class="error-box">{{ errorMessage() }}</div>
   }
+  @if (successMessage()) {
+    <div class="success-box">{{ successMessage() }}</div>
+  }
 
   <div class="filters-row">
     <div class="filter-field">
@@ -17,6 +20,7 @@
         <option value="en_attente">En attente</option>
         <option value="confirme">Confirmé</option>
         <option value="annule">Annulé</option>
+        <option value="reprogrammation">À reprogrammer ({{ reprogrammationCount() }})</option>
       </select>
     </div>
 
@@ -29,6 +33,22 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
       Effacer les filtres
     </button>
+
+    <div class="filter-field filter-search">
+      <label>Recherche</label>
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input
+          type="text"
+          placeholder="Patient, téléphone, médecin ou référence…"
+          (input)="filtreRecherche.set($any($event.target).value)"
+          [value]="filtreRecherche()"
+        />
+        @if (filtreRecherche()) {
+          <button type="button" class="search-clear" (click)="filtreRecherche.set('')">×</button>
+        }
+      </div>
+    </div>
   </div>
 
   @if (!loading()) {
@@ -93,7 +113,7 @@
 
   <div class="rdv-list">
     @for (rdv of rendezVousFiltres(); track rdv.id) {
-      <div class="rdv-card" [class.urgent]="rdv.urgent">
+      <div class="rdv-card" [class.urgent]="rdv.urgent" [style.border-left]="estAReprogrammer(rdv.id) ? '4px solid #f59e0b' : ''">
         <div class="rdv-main">
           <div class="rdv-top">
             <span class="date-heure">
@@ -103,6 +123,9 @@
             @if (rdv.urgent) {
               <span class="tag tag-urgent">Urgent</span>
             }
+            @if (estAReprogrammer(rdv.id)) {
+              <span class="tag" style="background:#fff7ed;color:#b45309;border:1px solid #fdba74;">À reprogrammer</span>
+            }
             <span class="tag" [class]="'tag-' + rdv.status">{{ statusLabel(rdv.status) }}</span>
           </div>
 
@@ -110,6 +133,15 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
             <strong>{{ rdv.patient.prenom }} {{ rdv.patient.nom }}</strong>
           </div>
+
+          @if (rdv.patient.telephone) {
+            <a class="patient-tel" [href]="'tel:' + rdv.patient.telephone">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>
+              {{ rdv.patient.telephone }}
+            </a>
+          } @else {
+            <span class="patient-tel patient-tel-absent">Téléphone non renseigné</span>
+          }
 
           <h3>{{ nomMedecin(rdv) }}</h3>
           @if (rdv.service) {
@@ -123,6 +155,16 @@
           @if (rdv.status === 'en_attente') {
             <button class="btn-confirmer" [disabled]="traitementEnCoursId() === rdv.id" (click)="confirmer(rdv.id)">
               Confirmer
+            </button>
+          }
+          @if (peutReprogrammer(rdv.status)) {
+            <button
+              class="btn-reprogrammer"
+              [class.btn-reprogrammer-prioritaire]="estAReprogrammer(rdv.id)"
+              [disabled]="traitementEnCoursId() === rdv.id"
+              (click)="ouvrirReprogrammation(rdv)"
+            >
+              Reprogrammer
             </button>
           }
           @if (rdv.status !== 'annule') {
@@ -139,5 +181,75 @@
       </div>
     }
   </div>
+
+  <dialog
+    #reprogDialog
+    class="reprog-dialog"
+    aria-labelledby="reprogrammer-title"
+    (close)="fermerReprogrammation()"
+    (click)="$event.target === $event.currentTarget && fermerReprogrammation()"
+  >
+    <div class="reprog-header">
+      <div>
+        <p class="reprog-kicker">Rendez-vous</p>
+        <h2 id="reprogrammer-title">Reprogrammer le rendez-vous</h2>
+      </div>
+      <button class="close-btn" type="button" aria-label="Fermer" (click)="fermerReprogrammation()">×</button>
+    </div>
+
+    @if (modalErreur()) {
+      <div class="error-box modal-error-box">
+        <div>{{ modalErreur() }}</div>
+        <button class="btn-secondary retry-btn" type="button" (click)="rechargerCreneaux()">Réessayer</button>
+      </div>
+    }
+
+    <div class="reprog-summary">
+      <div class="reprog-line"><strong>Patient :</strong> {{ modalRdv()?.patient?.prenom ?? 'Patient' }} {{ modalRdv()?.patient?.nom ?? '' }}</div>
+      <div class="reprog-line"><strong>Médecin :</strong> {{ modalRdv() ? nomMedecin(modalRdv()!) : '' }}</div>
+      <div class="reprog-line"><strong>Créneau actuel :</strong> {{ formatDateLong(modalRdv()?.date_rendez_vous ?? '') }} à {{ heureCourte(modalRdv()?.heure_rendez_vous ?? '') }}</div>
+    </div>
+
+    @if (loadingCreneaux()) {
+      <div class="state-message">Chargement des disponibilités...</div>
+    } @else if (creneauxDisponibles().length === 0) {
+      <div class="empty-dispo">Aucune disponibilité pour ce médecin pour le moment.</div>
+    } @else {
+      <p style="font-weight:600;color:#0f7f87;font-size:15px;margin:0;padding:20px 28px 4px;">
+        Planning de {{ modalRdv() ? nomMedecin(modalRdv()!) : '' }} — créneaux disponibles
+      </p>
+      <div class="reprog-groups">
+        @for (groupe of groupesCreneauxDisponibles(); track groupe.date) {
+          <div class="reprog-group">
+            <h3>{{ groupe.label }}</h3>
+            <div class="reprog-hours">
+              @for (creneau of groupe.creneaux; track creneau.id) {
+                <button
+                  type="button"
+                  class="reprog-slot"
+                  [class.selected]="creneauSelectionneId() === creneau.id"
+                  (click)="creneauSelectionneId.set(creneau.id)"
+                >
+                  {{ heureCourte(creneau.heure_debut) }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="reprog-actions">
+      <button class="btn-secondary" type="button" (click)="fermerReprogrammation()">Fermer</button>
+      <button
+        class="btn-primary"
+        type="button"
+        [disabled]="!creneauSelectionneId() || modalEnCours()"
+        (click)="confirmerReprogrammation()"
+      >
+        {{ modalEnCours() ? 'Traitement...' : 'Confirmer la reprogrammation' }}
+      </button>
+    </div>
+  </dialog>
 
 </div>

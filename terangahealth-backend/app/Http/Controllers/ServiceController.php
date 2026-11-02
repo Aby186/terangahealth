@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 class ServiceController extends Controller
 {
     /**
-     * Liste tous les services médicaux.
+     * Liste tous les services medicaux.
      * GET /api/services
      */
     public function index()
@@ -18,18 +18,18 @@ class ServiceController extends Controller
     }
 
     /**
-     * Vérifie que l'utilisateur connecté est bien un administrateur.
+     * Verifie que l'utilisateur connecte est bien un administrateur.
      */
     private function verifierAdmin(Request $request): ?\Illuminate\Http\JsonResponse
     {
         if (! $request->user()->isAdmin()) {
-            return response()->json(['message' => 'Accès réservé à l\'administrateur.'], 403);
+            return response()->json(['message' => "Acc\u{e8}s r\u{e9}serv\u{e9} \u{e0} l'administrateur."], 403);
         }
         return null;
     }
 
     /**
-     * Crée un nouveau service médical.
+     * Cree un nouveau service medical.
      * POST /api/services
      */
     public function store(Request $request)
@@ -40,19 +40,20 @@ class ServiceController extends Controller
             'nom'                => 'required|string|max:100|unique:services,nom',
             'description'        => 'required|string',
             'duree_consultation' => 'required|integer|min:5|max:180',
+            'tarif'              => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Données invalides.',
+                'message' => "Donn\u{e9}es invalides.",
                 'errors'  => $validator->errors(),
             ], 422);
         }
 
-        $service = Service::create($request->only(['nom', 'description', 'duree_consultation']));
+        $service = Service::create($request->only(['nom', 'description', 'duree_consultation', 'tarif']));
 
         return response()->json([
-            'message' => 'Service créé avec succès.',
+            'message' => "Service cr\u{e9}\u{e9} avec succ\u{e8}s.",
             'service' => $service,
         ], 201);
     }
@@ -69,25 +70,26 @@ class ServiceController extends Controller
             'nom'                => 'sometimes|string|max:100|unique:services,nom,' . $service->id,
             'description'        => 'sometimes|string',
             'duree_consultation' => 'sometimes|integer|min:5|max:180',
+            'tarif'              => 'sometimes|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Données invalides.',
+                'message' => "Donn\u{e9}es invalides.",
                 'errors'  => $validator->errors(),
             ], 422);
         }
 
-        $service->update($request->only(['nom', 'description', 'duree_consultation']));
+        $service->update($request->only(['nom', 'description', 'duree_consultation', 'tarif']));
 
         return response()->json([
-            'message' => 'Service mis à jour.',
+            'message' => "Service mis \u{e0} jour.",
             'service' => $service,
         ]);
     }
 
     /**
-     * Supprime un service (sauf s'il est encore rattaché à des médecins).
+     * Supprime un service (sauf s'il est encore rattache a des medecins).
      * DELETE /api/services/{service}
      */
     public function destroy(Request $request, Service $service)
@@ -96,12 +98,12 @@ class ServiceController extends Controller
 
         if ($service->medecins()->exists()) {
             return response()->json([
-                'message' => 'Impossible de supprimer ce service : des médecins y sont encore rattachés.',
+                'message' => "Impossible de supprimer ce service : des m\u{e9}decins y sont encore rattach\u{e9}s.",
             ], 409);
         }
 
         $service->delete();
 
-        return response()->json(['message' => 'Service supprimé.']);
+        return response()->json(['message' => "Service supprim\u{e9}."]);
     }
 }

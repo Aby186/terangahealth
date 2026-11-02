@@ -148,3 +148,18 @@
   .page { padding: 32px 20px 60px; }
   .services-grid { grid-template-columns: 1fr; }
 }
+/* Alignement des cartes : le bas de chaque carte (duree, prix, boutons) est au meme niveau */
+.services-grid {
+  align-items: stretch;
+}
+.services-grid .service-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.services-grid .service-card .description {
+  flex: 1 1 auto;
+}
+.services-grid .service-card .service-actions {
+  margin-top: auto;
+}

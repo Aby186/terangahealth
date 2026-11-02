@@ -22,7 +22,18 @@ class RendezVousController extends Controller
             ], 422);
         }
 
+        $tz = config('app.timezone');
+        $aujourdhui = now($tz)->toDateString();
+        $heure = now($tz)->format('H:i:s');
+
         $query = Creneau::disponibles()
+            ->where(function ($q) use ($aujourdhui, $heure) {
+                $q->whereHas('planning', fn ($p) => $p->whereDate('date_planning', '>', $aujourdhui))
+                  ->orWhere(function ($q2) use ($aujourdhui, $heure) {
+                      $q2->where('heure_debut', '>', $heure)
+                         ->whereHas('planning', fn ($p) => $p->whereDate('date_planning', $aujourdhui));
+                  });
+            })
             ->whereHas('planning', function ($q) use ($medecin, $request) {
                 $q->where('medecin_id', $medecin->id)
                   ->where('status', 'actif');
@@ -87,6 +98,12 @@ class RendezVousController extends Controller
 
         $creneau = Creneau::with('planning')->findOrFail($request->creneau_id);
 
+        if ($this->creneauPasse($creneau)) {
+            return response()->json([
+                'message' => "Ce cr\u{e9}neau est d\u{e9}j\u{e0} pass\u{e9}.",
+            ], 422);
+        }
+
         if ($creneau->status !== 'disponible') {
             return response()->json([
                 'message' => 'Ce créneau n\'est plus disponible.',
@@ -105,7 +122,7 @@ class RendezVousController extends Controller
             'date_rendez_vous'   => $creneau->planning->date_planning,
             'heure_rendez_vous'  => $creneau->heure_debut,
             'status'             => 'en_attente',
-            'urgent'             => RendezVous::detecterUrgence($request->motif, $service->nom),
+            'urgent'             => $this->detecterUrgenceIA($request->motif, $service->nom),
         ]);
 
         $creneau->update(['status' => 'reserve']);
@@ -202,8 +219,6 @@ class RendezVousController extends Controller
 
         $rendezVous->creneau->update(['status' => 'disponible']);
 
-        $this->notifierListeAttente($rendezVous->creneau, $rendezVous->service_id, $rendezVous->medecin_id, $rendezVous->patient_id);
-
         return response()->json([
             'message'     => 'Rendez-vous annulé.',
             'rendez_vous' => $rendezVous->load(['patient', 'medecin', 'service', 'creneau']),
@@ -211,14 +226,20 @@ class RendezVousController extends Controller
     }
 
     /**
-     * Reprogramme un rendez-vous sur un nouveau créneau (secrétaire/admin/médecin concerné).
+     * Reprogramme un rendez-vous sur un nouveau créneau (secrétaire/admin/médecin concerné,
+     * ou le patient concerné lui-même).
      * PUT /api/rendez-vous/{rendezVous}/reprogrammer
      */
     public function reprogrammer(Request $request, RendezVous $rendezVous)
     {
         $user = $request->user();
 
-        if (! $user->isSecretaire() && ! $user->isAdmin() && ! ($user->isMedecin() && $rendezVous->medecin_id === $user->id)) {
+        $estAutorise = $user->isSecretaire()
+            || $user->isAdmin()
+            || ($user->isMedecin() && $rendezVous->medecin_id === $user->id)
+            || ($user->isPatient() && $rendezVous->patient_id === $user->id);
+
+        if (! $estAutorise) {
             return response()->json([
                 'message' => 'Vous n\'êtes pas autorisé à reprogrammer ce rendez-vous.',
             ], 403);
@@ -243,6 +264,12 @@ class RendezVousController extends Controller
 
         $nouveauCreneau = Creneau::with('planning')->findOrFail($request->creneau_id);
 
+        if ($this->creneauPasse($nouveauCreneau)) {
+            return response()->json([
+                'message' => "Ce cr\u{e9}neau est d\u{e9}j\u{e0} pass\u{e9}.",
+            ], 422);
+        }
+
         if ($nouveauCreneau->status !== 'disponible') {
             return response()->json([
                 'message' => 'Ce créneau n\'est plus disponible.',
@@ -252,7 +279,6 @@ class RendezVousController extends Controller
         $ancienCreneau = $rendezVous->creneau;
 
         $ancienCreneau->update(['status' => 'disponible']);
-        $this->notifierListeAttente($ancienCreneau, $rendezVous->service_id, $rendezVous->medecin_id, $rendezVous->patient_id);
 
         $nouveauCreneau->update(['status' => 'reserve']);
 
@@ -285,8 +311,6 @@ class RendezVousController extends Controller
         $rendezVous->update(['status' => 'annule']);
         $rendezVous->creneau->update(['status' => 'disponible']);
 
-        $this->notifierListeAttente($rendezVous->creneau, $rendezVous->service_id, $rendezVous->medecin_id, $rendezVous->patient_id);
-
         return response()->json([
             'message' => 'Votre rendez-vous a bien été annulé.',
         ]);
@@ -314,26 +338,22 @@ class RendezVousController extends Controller
     }
 
     /**
-     * Notifie le premier patient en attente (par ordre d'inscription) pour ce service/médecin,
-     * en excluant celui qui vient d'annuler.
+     * Délègue la détection d'urgence au service partagé (mots-clés, puis IA).
      */
-    private function notifierListeAttente(\App\Models\Creneau $creneau, int $serviceId, int $medecinId, int $patientQuiAnnule): void
+    private function detecterUrgenceIA(string $motif, string $nomService): bool
     {
-        $premierEnAttente = \App\Models\ListeAttente::where('service_id', $serviceId)
-            ->where('statut', 'en_attente')
-            ->where('patient_id', '!=', $patientQuiAnnule)
-            ->where(function ($q) use ($medecinId) {
-                $q->whereNull('medecin_id')
-                  ->orWhere('medecin_id', $medecinId);
-            })
-            ->orderBy('created_at', 'asc')
-            ->first();
+        return app(\App\Services\UrgenceService::class)->detecter($motif, $nomService);
+    }
 
-        if (! $premierEnAttente) {
-            return;
-        }
+    /**
+     * Un creneau est passe si sa date + son heure de debut sont avant maintenant.
+     */
+    private function creneauPasse(Creneau $creneau): bool
+    {
+        $tz = config('app.timezone');
+        $jour = substr((string) $creneau->planning->date_planning, 0, 10);
+        $debut = \Illuminate\Support\Carbon::parse($jour . ' ' . $creneau->heure_debut, $tz);
 
-        $premierEnAttente->patient->notify(new \App\Notifications\CreneauLibere($creneau));
-        $premierEnAttente->update(['statut' => 'notifie']);
+        return $debut->lte(\Illuminate\Support\Carbon::now($tz));
     }
 }

@@ -1,0 +1,132 @@
+<div class="messagerie">
+
+  <aside class="conversations-panel">
+    <div class="panel-header">
+      <h2>Messages</h2>
+      <button class="btn-nouveau" (click)="ouvrirNouveauContact()" aria-label="Nouveau message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+    </div>
+
+    @if (loading()) {
+      <p class="hint">Chargement...</p>
+    }
+
+    @if (!loading() && conversations().length === 0 && !nouveauContactOuvert()) {
+      <div class="empty-conv">
+        <p>Aucune conversation pour l'instant.</p>
+        <button class="btn-primary" (click)="ouvrirNouveauContact()">Démarrer une conversation</button>
+      </div>
+    }
+
+    <div class="conversations-list">
+      @for (conv of conversations(); track conv.utilisateur.id) {
+        <button
+          class="conv-item"
+          [class.active]="contactActifId() === conv.utilisateur.id"
+          (click)="ouvrirConversation(conv.utilisateur.id)"
+        >
+          <div class="avatar">{{ initiales(conv.utilisateur) }}</div>
+          <div class="conv-info">
+            <strong>{{ nomComplet(conv.utilisateur) }}</strong>
+            <span class="conv-preview">{{ conv.dernier_message }}</span>
+          </div>
+          @if (conv.non_lus > 0) {
+            <span class="badge-non-lu">{{ conv.non_lus }}</span>
+          }
+        </button>
+      }
+    </div>
+  </aside>
+
+  <main class="chat-panel">
+
+    @if (nouveauContactOuvert()) {
+      <div class="nouveau-contact-panel">
+        <h3>Nouvelle conversation</h3>
+        @if (contactsSansConversation().length === 0) {
+          <p class="hint">Aucun nouveau contact disponible.</p>
+        }
+        <div class="contacts-list">
+          @for (c of contactsSansConversation(); track c.id) {
+            <button class="contact-item" (click)="ouvrirConversation(c.id)">
+              <div class="avatar">{{ initiales(c) }}</div>
+              <div>
+                <strong>{{ nomComplet(c) }}</strong>
+                <span class="contact-role">{{ c.role }}</span>
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+    } @else if (!contactActif()) {
+      <div class="empty-chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
+        <p>Sélectionnez une conversation pour commencer.</p>
+      </div>
+    } @else {
+      <div class="chat-header">
+        <div class="avatar">{{ initiales(contactActif()!) }}</div>
+        <div>
+          <strong>{{ nomComplet(contactActif()!) }}</strong>
+          <span class="contact-role">{{ contactActif()!.role }}</span>
+        </div>
+        <button class="btn-suppr-conv" (click)="supprimerConversation()" aria-label="Supprimer la conversation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>
+        </button>
+      </div>
+
+      <div class="messages-list">
+        @if (loadingMessages()) {
+          <p class="hint">Chargement...</p>
+        }
+        @for (m of messages(); track m.id) {
+          <div class="msg" [class.msg-moi]="estMoi(m)">
+            @if (messageEnEditionId() === m.id) {
+              <div class="edition-box">
+                <input
+                  type="text"
+                  [ngModel]="texteEdition()"
+                  (ngModelChange)="texteEdition.set($event)"
+                  (keyup.enter)="validerEdition(m.id)"
+                />
+                <div class="edition-actions">
+                  <button (click)="annulerEdition()">Annuler</button>
+                  <button (click)="validerEdition(m.id)">Valider</button>
+                </div>
+              </div>
+            } @else {
+              <p>{{ m.contenu }}</p>
+              <div class="msg-footer">
+                <span class="msg-heure">{{ formatHeure(m.created_at) }}</span>
+                @if (estMoi(m)) {
+                  <button class="btn-icone-msg" (click)="ouvrirEdition(m)" aria-label="Modifier">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5z" /></svg>
+                  </button>
+                }
+                <button class="btn-icone-msg" (click)="supprimer(m.id)" aria-label="Supprimer">
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="chat-input-row">
+        <input
+          type="text"
+          placeholder="Écrire un message..."
+          [(ngModel)]="nouveauMessage"
+          (keyup.enter)="envoyer()"
+          [disabled]="envoiEnCours()"
+        />
+        <button class="btn-envoyer" (click)="envoyer()" [disabled]="envoiEnCours() || !nouveauMessage().trim()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </button>
+      </div>
+    }
+
+  </main>
+
+</div>

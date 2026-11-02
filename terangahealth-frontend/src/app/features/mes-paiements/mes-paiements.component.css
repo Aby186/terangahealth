@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:host {
+  --navy-900: #102642;
+  --teal-500: #1FAAB4;
+  --ink-900: #0F172A;
+  --ink-500: #4B5563;
+  --line: #E6EEF9;
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #F7FBFC;
+  min-height: 100vh;
+}
+
+* { box-sizing: border-box; }
+
+.page {
+  max-width: 800px;
+  margin: 0;
+  padding: 40px;
+}
+
+.page-header-box {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.page-header-box h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0 0 6px;
+}
+
+.page-header-box p {
+  font-size: 13.5px;
+  color: var(--ink-500);
+  margin: 0;
+}
+
+.error-box {
+  background: #FEF2F2;
+  color: #B42318;
+  border: 1px solid #FECACA;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.state-message,
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--ink-500);
+}
+
+.empty-state {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+}
+
+.paiements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paiement-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.paiement-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.paiement-info strong {
+  font-size: 14px;
+  color: var(--ink-900);
+}
+
+.paiement-info span {
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+.ref {
+  color: #94A3B8 !important;
+}
+
+.paiement-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.montant {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--teal-500);
+}
+
+.statut {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.statut-paye {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.statut-en_attente {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.statut-echoue {
+  background: #FEE2E2;
+  color: #B91C1C;
+}
+
+.date {
+  font-size: 11px;
+  color: #94A3B8;
+}
+
+.btn-facture {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 7px 14px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--teal-500);
+  background: #E8F7F8;
+  border: 1px solid #BFE9EC;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+
+.btn-facture:hover {
+  background: var(--teal-500);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-facture:focus-visible {
+  outline: 2px solid var(--teal-500);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 24px 20px;
+  }
+
+  .paiement-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .paiement-right {
+    align-items: flex-start;
+  }
+}

@@ -99,64 +99,6 @@
           <p class="motif">{{ rdv.motif }}</p>
           <p class="numero">Réf. {{ rdv.numero_rendez_vous }}</p>
 
-          @if (reprogrammationOuverteId() === rdv.id) {
-            <div class="reprog-box">
-              <label>Nouvelle date</label>
-              <input
-                type="date"
-                [ngModel]="nouvelleDateReprog()"
-                (ngModelChange)="nouvelleDateReprog.set($event)"
-                (change)="onDateReprogChange()"
-              />
-
-              @if (loadingCreneauxReprog()) {
-                <p class="hint">Chargement des créneaux...</p>
-              } @else if (nouvelleDateReprog() && creneauxReprog().length === 0) {
-                <p class="hint">Aucun créneau disponible à cette date.</p>
-              }
-
-              <div class="creneaux-grid">
-                @for (creneau of creneauxReprog(); track creneau.id) {
-                  <label class="creneau-option" [class.selected]="creneauChoisiId() === creneau.id">
-                    <input
-                      type="radio"
-                      name="creneau-{{ rdv.id }}"
-                      [checked]="creneauChoisiId() === creneau.id"
-                      (change)="creneauChoisiId.set(creneau.id)"
-                    />
-                    {{ creneau.heure_debut.substring(0, 5) }}
-                  </label>
-                }
-              </div>
-
-              <div class="reprog-actions">
-                <button class="btn-annuler-reprog" (click)="fermerReprogrammation()">Annuler</button>
-                <button
-                  class="btn-confirmer-reprog"
-                  [disabled]="!creneauChoisiId() || traitementEnCoursId() === rdv.id"
-                  (click)="confirmerReprogrammation(rdv.id)"
-                >
-                  {{ traitementEnCoursId() === rdv.id ? 'Enregistrement...' : 'Valider le nouveau créneau' }}
-                </button>
-              </div>
-            </div>
-          }
-        </div>
-
-        <div class="rdv-actions">
-          @if (rdv.status === 'en_attente') {
-            <button class="btn-confirmer" [disabled]="traitementEnCoursId() === rdv.id" (click)="confirmer(rdv.id)">
-              Confirmer
-            </button>
-          }
-          @if (rdv.status !== 'annule') {
-            <button class="btn-reprogrammer" (click)="ouvrirReprogrammation(rdv)">
-              Reprogrammer
-            </button>
-            <button class="btn-annuler" [disabled]="traitementEnCoursId() === rdv.id" (click)="annuler(rdv.id)">
-              Annuler
-            </button>
-          }
         </div>
       </div>
     }

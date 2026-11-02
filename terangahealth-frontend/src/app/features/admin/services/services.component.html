@@ -4,7 +4,7 @@
     <div class="header-row">
       <div>
         <h1>Gestion des services</h1>
-        <p>Créez et gérez les spécialités médicales de la clinique.</p>
+        <p>Cr&eacute;ez et g&eacute;rez les sp&eacute;cialit&eacute;s m&eacute;dicales de la clinique.</p>
       </div>
       <button class="btn-primary" (click)="ouvrirCreation()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14" /></svg>
@@ -22,7 +22,9 @@
 
   @if (formulaireOuvert()) {
     <div class="form-box">
-      <h3>{{ serviceEnEditionId() ? 'Modifier le service' : 'Créer un service' }}</h3>
+      <h3>
+        @if (serviceEnEditionId()) { Modifier le service } @else { Cr&eacute;er un service }
+      </h3>
       <form [formGroup]="form" (ngSubmit)="enregistrer()">
         <div class="field">
           <label>Nom du service</label>
@@ -31,18 +33,28 @@
 
         <div class="field">
           <label>Description</label>
-          <textarea formControlName="description" rows="3" placeholder="Décrivez la spécialité..."></textarea>
+          <textarea formControlName="description" rows="3" placeholder="D&eacute;crivez la sp&eacute;cialit&eacute;..."></textarea>
         </div>
 
         <div class="field field-small">
-          <label>Durée de consultation (min)</label>
+          <label>Dur&eacute;e de consultation (min)</label>
           <input type="number" formControlName="duree_consultation" min="5" max="180" />
+        </div>
+
+        <div class="field field-small">
+          <label>Prix de la consultation (FCFA)</label>
+          <input type="number" formControlName="tarif" min="0" step="500" placeholder="Ex : 15000" />
+          @if (form.controls.tarif.invalid && form.controls.tarif.touched) {
+            <small style="color:#c0392b">Indiquez un prix valide (0 ou plus).</small>
+          }
         </div>
 
         <div class="form-actions">
           <button type="button" class="btn-annuler" (click)="fermerFormulaire()">Annuler</button>
           <button type="submit" class="btn-confirmer" [disabled]="enregistrementEnCours()">
-            {{ enregistrementEnCours() ? 'Enregistrement...' : (serviceEnEditionId() ? 'Enregistrer' : 'Créer le service') }}
+            @if (enregistrementEnCours()) { Enregistrement... }
+            @else if (serviceEnEditionId()) { Enregistrer }
+            @else { Cr&eacute;er le service }
           </button>
         </div>
       </form>
@@ -57,17 +69,17 @@
       </div>
       <button type="button" class="btn-reinitialiser" (click)="reinitialiser()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" /></svg>
-        Réinitialiser
+        R&eacute;initialiser
       </button>
     </div>
-    <p class="filter-count">{{ servicesFiltres().length }} service{{ servicesFiltres().length > 1 ? 's' : '' }} trouvé{{ servicesFiltres().length > 1 ? 's' : '' }}</p>
+    <p class="filter-count">{{ servicesFiltres().length }} service{{ servicesFiltres().length > 1 ? 's' : '' }} trouv&eacute;{{ servicesFiltres().length > 1 ? 's' : '' }}</p>
   </div>
 
   @if (loading()) {
     <div class="state-message">Chargement des services...</div>
   }
   @if (!loading() && servicesFiltres().length === 0) {
-    <div class="empty-state"><p>Aucun service ne correspond à votre recherche.</p></div>
+    <div class="empty-state"><p>Aucun service ne correspond &agrave; votre recherche.</p></div>
   }
 
   <div class="services-grid">
@@ -82,6 +94,12 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
           {{ service.duree_consultation }} min par consultation
         </p>
+        @if (prix(service)) {
+          <p class="duree">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></svg>
+            {{ prix(service) }} par consultation
+          </p>
+        }
 
         <div class="service-actions">
           <button class="btn-modifier" (click)="ouvrirEdition(service)">Modifier</button>

@@ -2,8 +2,6 @@ import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RendezVousService, RendezVousItem } from '../../../core/rendez-vous.service';
-import { MedecinsService, Creneau } from '../../../core/medecins.service';
-import { AuthService } from '../../../core/auth.service';
 
 @Component({
   selector: 'app-medecin-rendez-vous',
@@ -14,13 +12,10 @@ import { AuthService } from '../../../core/auth.service';
 })
 export class MedecinRendezVousComponent implements OnInit {
   private rendezVousService = inject(RendezVousService);
-  private medecinsService = inject(MedecinsService);
-  private auth = inject(AuthService);
 
   tousLesRendezVous = signal<RendezVousItem[]>([]);
   loading = signal(true);
   errorMessage = signal<string | null>(null);
-  traitementEnCoursId = signal<number | null>(null);
 
   filtreStatut = signal('tous');
   filtreDate = signal('');
@@ -43,13 +38,6 @@ export class MedecinRendezVousComponent implements OnInit {
       .sort((a, b) => b.date_rendez_vous.localeCompare(a.date_rendez_vous));
   });
 
-  // ---------- Reprogrammation ----------
-  reprogrammationOuverteId = signal<number | null>(null);
-  nouvelleDateReprog = signal('');
-  creneauxReprog = signal<Creneau[]>([]);
-  loadingCreneauxReprog = signal(false);
-  creneauChoisiId = signal<number | null>(null);
-
   ngOnInit(): void {
     this.charger();
   }
@@ -71,84 +59,6 @@ export class MedecinRendezVousComponent implements OnInit {
   effacerFiltres(): void {
     this.filtreStatut.set('tous');
     this.filtreDate.set('');
-  }
-
-  confirmer(id: number): void {
-    this.traitementEnCoursId.set(id);
-    this.rendezVousService.confirmer(id).subscribe({
-      next: () => {
-        this.traitementEnCoursId.set(null);
-        this.charger();
-      },
-      error: () => {
-        this.traitementEnCoursId.set(null);
-        this.errorMessage.set('Impossible de confirmer ce rendez-vous.');
-      },
-    });
-  }
-
-  annuler(id: number): void {
-    if (!confirm('Confirmer l\'annulation de ce rendez-vous ?')) return;
-
-    this.traitementEnCoursId.set(id);
-    this.rendezVousService.annuler(id).subscribe({
-      next: () => {
-        this.traitementEnCoursId.set(null);
-        this.charger();
-      },
-      error: () => {
-        this.traitementEnCoursId.set(null);
-        this.errorMessage.set('Impossible d\'annuler ce rendez-vous.');
-      },
-    });
-  }
-
-  ouvrirReprogrammation(rdv: RendezVousItem): void {
-    this.reprogrammationOuverteId.set(rdv.id);
-    this.nouvelleDateReprog.set('');
-    this.creneauxReprog.set([]);
-    this.creneauChoisiId.set(null);
-  }
-
-  fermerReprogrammation(): void {
-    this.reprogrammationOuverteId.set(null);
-  }
-
-  onDateReprogChange(): void {
-    const medecinId = this.auth.currentUser()?.id;
-    const date = this.nouvelleDateReprog();
-    if (!medecinId || !date) return;
-
-    this.loadingCreneauxReprog.set(true);
-    this.creneauChoisiId.set(null);
-
-    this.medecinsService.getCreneaux(medecinId, date).subscribe({
-      next: (data) => {
-        this.creneauxReprog.set(data);
-        this.loadingCreneauxReprog.set(false);
-      },
-      error: () => {
-        this.loadingCreneauxReprog.set(false);
-      },
-    });
-  }
-
-  confirmerReprogrammation(rdvId: number): void {
-    const creneauId = this.creneauChoisiId();
-    if (!creneauId) return;
-
-    this.traitementEnCoursId.set(rdvId);
-    this.rendezVousService.reprogrammer(rdvId, creneauId).subscribe({
-      next: () => {
-        this.traitementEnCoursId.set(null);
-        this.reprogrammationOuverteId.set(null);
-        this.charger();
-      },
-      error: (err) => {
-        this.traitementEnCoursId.set(null);
-        this.errorMessage.set(err.error?.message ?? 'Impossible de reprogrammer ce rendez-vous.');
-      },
-    });
   }
 
   nomPatient(rdv: RendezVousItem): string {

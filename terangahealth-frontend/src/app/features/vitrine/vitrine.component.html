@@ -2,16 +2,19 @@
 
   <section class="hero">
     <div class="hero-media">
-      <img src="images/image.png" alt="Personnel médical de TerangaHealth" />
+      <img src="images/image.png" alt="Personnel m&eacute;dical de TerangaHealth" />
       <div class="hero-scrim"></div>
     </div>
 
     <header class="vitrine-header">
       <div class="brand">
-        <div class="heart">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.4-9.5-9C.7 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.4C11.6 6 13 5 15 5c3.6 0 5.3 3.4 3.5 7-2.5 4.6-9.5 9-9.5 9z" fill="#1FAAB4" /></svg>
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 21s-7-4.4-9.5-9C.7 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.4C11.6 6 13 5 15 5c3.6 0 5.3 3.4 3.5 7-2.5 4.6-9.5 9-9.5 9z" fill="#FFFFFF" />
+            <path d="M5 12.5h3.2l1.6-3.2 2.4 6 1.8-3H19" stroke="#1FAAB4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </div>
-        <span>TerangaHealth</span>
+        <span class="brand-name">Teranga<b>Health</b></span>
       </div>
 
       <nav class="main-nav">
@@ -27,7 +30,7 @@
     </header>
 
     <div class="hero-content">
-      <h1>Vos rendez-vous médicaux, faciles et rapides.</h1>
+      <h1>Vos rendez-vous m&eacute;dicaux, faciles et rapides.</h1>
       <div class="hero-actions">
         <a routerLink="/connexion" class="btn-primary">Prendre rendez-vous</a>
         <a href="#services" class="btn-secondary">Voir nos services</a>
@@ -39,18 +42,59 @@
     </a>
   </section>
 
+  <section class="trust">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        </div>
+        <div>
+          <strong>R&eacute;servation 24h/24</strong>
+          <span>Quand vous voulez</span>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M9 12l2 2 4-4" /></svg>
+        </div>
+        <div>
+          <strong>Paiement s&eacute;curis&eacute;</strong>
+          <span>Orange Money (Max it)</span>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></svg>
+        </div>
+        <div>
+          <strong>Rappels SMS et e-mail</strong>
+          <span>Aucun rendez-vous oubli&eacute;</span>
+        </div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0014 0M12 18v3" /></svg>
+        </div>
+        <div>
+          <strong>Assistant vocal</strong>
+          <span>En fran&ccedil;ais et en wolof</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="features" id="features">
     <div class="section-heading">
       <span>Ce que nous offrons</span>
-      <h2>Un accompagnement médical simple et efficace</h2>
+      <h2>Un accompagnement m&eacute;dical simple et efficace</h2>
     </div>
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M8 3v4M16 3v4M3 10h18" /></svg>
         </div>
-        <h3>Réservation en ligne</h3>
-        <p>Réservez votre consultation en quelques clics, sans attente téléphonique.</p>
+        <h3>R&eacute;servation en ligne</h3>
+        <p>R&eacute;servez votre consultation en quelques clics, sans attente t&eacute;l&eacute;phonique.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
@@ -63,16 +107,64 @@
         <div class="feature-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
         </div>
-        <h3>Suivi personnalisé</h3>
-        <p>Accédez à votre historique et restez informé de vos prochaines consultations.</p>
+        <h3>Suivi personnalis&eacute;</h3>
+        <p>Acc&eacute;dez &agrave; votre historique et restez inform&eacute; de vos prochaines consultations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps" id="comment">
+    <div class="section-heading">
+      <span>Comment &ccedil;a marche</span>
+      <h2>Votre rendez-vous en 4 &eacute;tapes</h2>
+    </div>
+    <ol class="steps-list">
+      <li>
+        <div class="step-num">1</div>
+        <h3>Cr&eacute;ez votre compte</h3>
+        <p>Inscrivez-vous en une minute avec votre e-mail et votre num&eacute;ro de t&eacute;l&eacute;phone.</p>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <h3>Choisissez un cr&eacute;neau</h3>
+        <p>S&eacute;lectionnez la sp&eacute;cialit&eacute;, le m&eacute;decin et une heure disponible.</p>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <h3>Payez en ligne</h3>
+        <p>R&eacute;glez la consultation avec Orange Money (Max it), sans formulaire &agrave; remplir.</p>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <h3>Recevez votre re&ccedil;u</h3>
+        <p>Votre facture arrive par e-mail et par SMS d&egrave;s la confirmation du paiement.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="voice" id="assistant">
+    <div class="voice-inner">
+      <div class="voice-text">
+        <span class="voice-tag">Assistant vocal</span>
+        <h2>Parlez, on s&rsquo;occupe du reste.</h2>
+        <p>Dites ce dont vous avez besoin, en fran&ccedil;ais ou en wolof. L&rsquo;assistant comprend votre demande, propose les cr&eacute;neaux disponibles et vous guide jusqu&rsquo;au paiement. Id&eacute;al si vous pr&eacute;f&eacute;rez parler plut&ocirc;t qu&rsquo;&eacute;crire.</p>
+        <a routerLink="/connexion" class="btn-primary">Essayer l&rsquo;assistant</a>
+      </div>
+      <div class="voice-visual" aria-hidden="true">
+        <span class="wave w1"></span>
+        <span class="wave w2"></span>
+        <span class="wave w3"></span>
+        <div class="mic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0014 0M12 18v3" /></svg>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="services-section" id="services">
     <div class="section-heading">
-      <span>Nos spécialités</span>
-      <h2>Tous nos services médicaux</h2>
+      <span>Nos sp&eacute;cialit&eacute;s</span>
+      <h2>Tous nos services m&eacute;dicaux</h2>
     </div>
 
     @if (loadingServices()) {
@@ -93,22 +185,83 @@
           </div>
         }
       </div>
+      <div class="services-more">
+        <a routerLink="/services" class="link-more">Voir tous les d&eacute;tails des services</a>
+      </div>
     }
   </section>
 
   <section class="contact" id="contact">
-    <div class="contact-card">
-      <h2>Besoin d’aide ?</h2>
-      <p>Contactez notre équipe ou passez directement par le formulaire de connexion pour une inscription rapide.</p>
-      <div class="contact-actions">
-        <a href="mailto:contact@terangahealth.sn" class="btn-primary">Nous écrire</a>
-        <a href="tel:+221000000000" class="btn-secondary">Appeler</a>
+    <div class="section-heading">
+      <span>Contact</span>
+      <h2>Besoin d&rsquo;aide ?</h2>
+      <p>Notre &eacute;quipe vous r&eacute;pond avec plaisir. Vous pouvez aussi cr&eacute;er votre compte directement pour r&eacute;server en quelques minutes.</p>
+    </div>
+    <div class="contact-grid">
+      <a href="tel:+221000000000" class="contact-item">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6a2 2 0 012-2h3l2 4-1.5 1.5a11 11 0 006 6L17 14l4 2v3a2 2 0 01-2 2C10.5 21 4 14.5 4 6z" /></svg>
+        </div>
+        <div>
+          <strong>T&eacute;l&eacute;phone</strong>
+          <span>+221 00 000 00 00</span>
+        </div>
+      </a>
+      <a href="mailto:contact@terangahealth.sn" class="contact-item">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>
+        </div>
+        <div>
+          <strong>E-mail</strong>
+          <span>contact@terangahealth.sn</span>
+        </div>
+      </a>
+      <div class="contact-item">
+        <div class="contact-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6 7-11a7 7 0 00-14 0c0 5 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
+        </div>
+        <div>
+          <strong>Adresse</strong>
+          <span>Clinique Elok Cardiologie, Dakar</span>
+        </div>
       </div>
+    </div>
+    <div class="contact-cta">
+      <a routerLink="/connexion" [queryParams]="{ tab: 'register' }" class="btn-primary">Cr&eacute;er mon compte</a>
     </div>
   </section>
 
   <footer class="vitrine-footer">
-    <p>© 2026 TerangaHealth — Clinique Elok Cardiologie, Dakar</p>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand">
+          <div class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 21s-7-4.4-9.5-9C.7 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.4C11.6 6 13 5 15 5c3.6 0 5.3 3.4 3.5 7-2.5 4.6-9.5 9-9.5 9z" fill="#FFFFFF" />
+              <path d="M5 12.5h3.2l1.6-3.2 2.4 6 1.8-3H19" stroke="#1FAAB4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <span class="brand-name">Teranga<b>Health</b></span>
+        </div>
+        <p>La plateforme de rendez-vous de la Clinique Elok Cardiologie, &agrave; Dakar.</p>
+      </div>
+      <div>
+        <h4>Navigation</h4>
+        <ul>
+          <li><a routerLink="/">Accueil</a></li>
+          <li><a routerLink="/services">Nos services</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Espace patient</h4>
+        <ul>
+          <li><a routerLink="/connexion">Connexion</a></li>
+          <li><a routerLink="/connexion" [queryParams]="{ tab: 'register' }">Inscription</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 TerangaHealth &mdash; Clinique Elok Cardiologie, Dakar</p>
   </footer>
 
 </div>

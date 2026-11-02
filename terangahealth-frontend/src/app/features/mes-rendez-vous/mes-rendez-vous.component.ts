@@ -1,27 +1,55 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RendezVousService, RendezVousItem } from '../../core/rendez-vous.service';
+import { MedecinsService, Creneau } from '../../core/medecins.service';
+
+type FiltreStatut = 'tous' | 'en_attente' | 'confirme' | 'annule';
 
 @Component({
   selector: 'app-mes-rendez-vous',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './mes-rendez-vous.component.html',
   styleUrl: './mes-rendez-vous.component.css',
 })
 export class MesRendezVousComponent implements OnInit {
   private rendezVousService = inject(RendezVousService);
+  private medecinsService = inject(MedecinsService);
 
   rendezVous = signal<RendezVousItem[]>([]);
   loading = signal(true);
   errorMessage = signal<string | null>(null);
   cancellingId = signal<number | null>(null);
 
+  reprogrammationOuverteId = signal<number | null>(null);
+  nouvelleDateReprog = signal('');
+  creneauxReprog = signal<Creneau[]>([]);
+  loadingCreneauxReprog = signal(false);
+  creneauChoisiId = signal<number | null>(null);
+  traitementEnCoursId = signal<number | null>(null);
+
+  // Filtres de la liste
+  filtreStatut = signal<FiltreStatut>('tous');
+  filtreDate = signal('');
+
   totalCount = computed(() => this.rendezVous().length);
   enAttenteCount = computed(() => this.rendezVous().filter((r) => r.status === 'en_attente').length);
   confirmeCount = computed(() => this.rendezVous().filter((r) => r.status === 'confirme').length);
   annuleCount = computed(() => this.rendezVous().filter((r) => r.status === 'annule').length);
+
+  // Rendez-vous affichés après application des deux filtres
+  rendezVousFiltres = computed(() => {
+    const statut = this.filtreStatut();
+    const date = this.filtreDate();
+
+    return this.rendezVous().filter((r) => {
+      const matchStatut = statut === 'tous' || r.status === statut;
+      const matchDate = !date || r.date_rendez_vous.substring(0, 10) === date;
+      return matchStatut && matchDate;
+    });
+  });
 
   // id du rendez-vous -> position dans l'historique avec ce médecin (1 = premier)
   private ordresConsultation = new Map<number, number>();
@@ -75,6 +103,24 @@ export class MesRendezVousComponent implements OnInit {
     });
   }
 
+  // Clic sur une carte de statistiques : filtre la liste par statut
+  choisirStatut(statut: FiltreStatut): void {
+    this.filtreStatut.set(statut);
+    this.listeOuverte.set(true);
+  }
+
+  // Choix d'une date dans le calendrier
+  changerDate(valeur: string): void {
+    this.filtreDate.set(valeur);
+    if (valeur) {
+      this.listeOuverte.set(true);
+    }
+  }
+
+  effacerDate(): void {
+    this.filtreDate.set('');
+  }
+
   annuler(id: number): void {
     if (!confirm('Confirmer l\'annulation de ce rendez-vous ?')) return;
 
@@ -87,6 +133,54 @@ export class MesRendezVousComponent implements OnInit {
       error: () => {
         this.cancellingId.set(null);
         this.errorMessage.set('Impossible d\'annuler ce rendez-vous.');
+      },
+    });
+  }
+
+  ouvrirReprogrammation(rdv: RendezVousItem): void {
+    this.reprogrammationOuverteId.set(rdv.id);
+    this.nouvelleDateReprog.set('');
+    this.creneauxReprog.set([]);
+    this.creneauChoisiId.set(null);
+  }
+
+  fermerReprogrammation(): void {
+    this.reprogrammationOuverteId.set(null);
+  }
+
+  onDateReprogChange(medecinId: number): void {
+    const date = this.nouvelleDateReprog();
+    if (!date) return;
+
+    this.loadingCreneauxReprog.set(true);
+    this.creneauChoisiId.set(null);
+
+    this.medecinsService.getCreneaux(medecinId, date).subscribe({
+      next: (data) => {
+        this.creneauxReprog.set(data);
+        this.loadingCreneauxReprog.set(false);
+      },
+      error: () => {
+        this.loadingCreneauxReprog.set(false);
+      },
+    });
+  }
+
+  confirmerReprogrammation(rdvId: number): void {
+    const creneauId = this.creneauChoisiId();
+    if (!creneauId) return;
+
+    this.traitementEnCoursId.set(rdvId);
+
+    this.rendezVousService.reprogrammer(rdvId, creneauId).subscribe({
+      next: () => {
+        this.traitementEnCoursId.set(null);
+        this.reprogrammationOuverteId.set(null);
+        this.charger();
+      },
+      error: (err) => {
+        this.traitementEnCoursId.set(null);
+        this.errorMessage.set(err.error?.message ?? 'Impossible de reprogrammer ce rendez-vous.');
       },
     });
   }

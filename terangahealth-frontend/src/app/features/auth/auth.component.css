@@ -241,3 +241,84 @@ input:focus {
   .form-panel { height: auto; }
   .form-card { height: auto; padding: 32px 24px; }
 }
+/* ===== Ajustements design (maquette) ===== */
+.form-logo {
+  width: 40px;
+  height: 40px;
+}
+label {
+  font-size: 12px;
+  font-weight: 700;
+}
+.input-wrap input {
+  height: 40px;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: #7fcdd2;
+}
+.input-wrap:has(.toggle-visibility) input {
+  padding-right: 42px;
+}
+.toggle-visibility {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+.toggle-visibility:hover {
+  color: var(--teal-500);
+}
+/* La page de connexion est remontee de 14 px (le lien "Mot de passe oublie" n'existe que sur la connexion) */
+.form-card:has(.forgot-link) {
+  padding-top: 34px;
+}
+/* Chrome autofill : garder la couleur des champs du design */
+.input-wrap input:-webkit-autofill,
+.input-wrap input:-webkit-autofill:hover {
+  -webkit-box-shadow: 0 0 0 1000px #F4FCFD inset;
+  box-shadow: 0 0 0 1000px #F4FCFD inset;
+  -webkit-text-fill-color: var(--ink-900);
+  caret-color: var(--ink-900);
+  border-color: #7fcdd2;
+}
+.input-wrap input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset, 0 0 0 4px rgba(31, 170, 180, .12);
+  box-shadow: 0 0 0 1000px #ffffff inset, 0 0 0 4px rgba(31, 170, 180, .12);
+  -webkit-text-fill-color: var(--ink-900);
+  border-color: var(--teal-500);
+}
+/* ---- Logo identique a la page d'accueil ---- */
+.form-logo {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.form-logo .logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1FAAB4, #0E7C86);
+  box-shadow: 0 8px 20px rgba(14, 124, 134, .3), inset 0 0 0 1px rgba(255,255,255,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.form-logo .logo-mark svg { width: 24px; height: 24px; }
+.form-logo .brand-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  color: #102642;
+}
+.form-logo .brand-name b { color: #1FAAB4; font-weight: 800; }
+.form-logo .brand-name { display: none; }
+.form-logo { margin-bottom: 16px; }

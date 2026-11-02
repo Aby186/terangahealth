@@ -126,6 +126,7 @@
   border: 1px solid var(--line);
   box-shadow: 0 6px 18px rgba(14, 93, 100, 0.05);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
@@ -237,4 +238,151 @@
 @media (max-width: 560px) {
   .rdv-card { flex-direction: column; }
   .rdv-side { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+}
+
+.btn-reprogrammer {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid #A9E0E4;
+  background: #fff;
+  color: #0E6E75;
+  transition: background .2s ease;
+}
+.btn-reprogrammer:hover { background: #F4FCFD; }
+
+.reprog-box {
+  flex: 1 1 100%;
+  margin-top: 14px;
+  padding: 16px;
+  background: #F4FCFD;
+  border: 1px dashed #A9E0E4;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.reprog-box label { font-size: 12px; font-weight: 600; }
+.reprog-box input[type="date"] {
+  padding: 9px 12px;
+  border: 1px solid #C7E6E9;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+}
+.hint { font-size: 12px; color: var(--ink-500); margin: 0; }
+
+.creneaux-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+}
+.creneau-option {
+  position: relative;
+  text-align: center;
+  padding: 8px 0;
+  border: 1.5px solid #C7E6E9;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.creneau-option input { position: absolute; opacity: 0; }
+.creneau-option.selected {
+  background: var(--teal-500);
+  border-color: var(--teal-500);
+  color: #fff;
+}
+
+.reprog-actions { display: flex; gap: 10px; }
+.btn-annuler-reprog, .btn-confirmer-reprog {
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  transition: background .2s ease;
+}
+.btn-annuler-reprog { background: #F1F5F9; color: var(--ink-500); }
+.btn-annuler-reprog:hover { background: #E2E8F0; }
+.btn-confirmer-reprog { background: var(--teal-500); color: #fff; }
+.btn-confirmer-reprog:hover:not(:disabled) { background: #17929a; }
+.btn-confirmer-reprog:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Cartes de statistiques cliquables */
+.stat-cliquable {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  border: 1.5px solid transparent;
+}
+
+.stat-cliquable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(31, 170, 180, 0.15);
+}
+
+.stat-cliquable:focus-visible {
+  outline: 2px solid #1faab4;
+  outline-offset: 2px;
+}
+
+.stat-actif {
+  border-color: #1faab4;
+  box-shadow: 0 6px 16px rgba(31, 170, 180, 0.18);
+}
+
+/* Recherche par date */
+.filtre-date-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0 16px;
+}
+
+.filtre-date-bar label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f2a3d;
+}
+
+.filtre-date-bar input[type='date'] {
+  padding: 9px 12px;
+  border: 1px solid #cfe6e8;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  color: #0f2a3d;
+}
+
+.filtre-date-bar input[type='date']:focus {
+  outline: none;
+  border-color: #1faab4;
+}
+
+.btn-effacer-date {
+  padding: 8px 14px;
+  border: 1px solid #cfe6e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f7f87;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-effacer-date:hover {
+  background: #e9f7f8;
+}
+.filtre-date-bar input[type='date'] {
+  font-family: inherit;
 }

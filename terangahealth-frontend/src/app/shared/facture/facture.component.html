@@ -1,0 +1,59 @@
+<dialog #dialogRef class="facture-dialog" aria-labelledby="facture-title">
+  @if (paiement) {
+    <div class="facture-card">
+      <div class="facture-header">
+        <div>
+          <div class="facture-brand">Clinique Elok Cardiologie, TerangaHealth</div>
+          <div class="facture-title" id="facture-title">FACTURE</div>
+        </div>
+        <div class="facture-badge">Payé en ligne</div>
+      </div>
+
+      <div class="facture-meta">
+        <div class="facture-row">
+          <span>Numéro</span>
+          <strong>{{ numeroFacture }}</strong>
+        </div>
+        <div class="facture-row">
+          <span>Date du paiement</span>
+          <strong>{{ datePaiement }}</strong>
+        </div>
+        <div class="facture-row">
+          <span>Patient</span>
+          <strong>{{ patientNom }}</strong>
+        </div>
+        <div class="facture-row">
+          <span>Médecin</span>
+          <strong>{{ medecinNom }}</strong>
+        </div>
+        <div class="facture-row">
+          <span>Service</span>
+          <strong>{{ serviceNom }}</strong>
+        </div>
+        <div class="facture-row">
+          <span>Date et heure</span>
+          <strong>{{ dateRendezVous }} · {{ heureRendezVous }}</strong>
+        </div>
+      </div>
+
+      <div class="facture-ligne">
+        <span>Consultation {{ serviceNom }}</span>
+        <strong>{{ montantTotal }} FCFA</strong>
+      </div>
+
+      <div class="facture-total">
+        <span>Total</span>
+        <strong>{{ montantTotal }} FCFA</strong>
+      </div>
+
+      <div class="facture-footer">
+        <p>Paiement non remboursable. Présentez cette facture à la secrétaire à votre arrivée.</p>
+      </div>
+
+      <div class="facture-actions no-print">
+        <button type="button" class="btn-print" (click)="imprimer()">Imprimer / Enregistrer en PDF</button>
+        <button type="button" class="btn-close" (click)="fermerDialog()">Fermer</button>
+      </div>
+    </div>
+  }
+</dialog>

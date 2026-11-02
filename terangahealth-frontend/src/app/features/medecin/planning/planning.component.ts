@@ -1,136 +1,145 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/auth.service';
 import { PlanningService, PlanningItem } from '../../../core/planning.service';
 
-interface CelluleCalendrier {
-  creneauId: number | null;
-  status: string | null;
-  patientNom: string | null;
-  motif: string | null;
+interface RendezVousAgenda {
+  id: number;
+  date: string;      // AAAA-MM-JJ
+  heure: string;     // HH:MM
+  debut: Date;
+  fin: Date;
+  patientNom: string;
+  motif: string;
+  urgent: boolean;
+  status: string;
+  numero: string;
 }
 
-interface ResumeJour {
-  date: Date;
-  horsMois: boolean;
-  disponibles: number;
-  reserves: number;
+interface GroupeJour {
+  date: string;
+  titre: string;
+  sousTitre: string;
+  items: RendezVousAgenda[];
 }
+
+type FiltrePeriode = 'tous' | 'aujourdhui' | 'semaine';
 
 @Component({
   selector: 'app-medecin-planning',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule],
   templateUrl: './planning.component.html',
   styleUrl: './planning.component.css',
 })
-export class MedecinPlanningComponent implements OnInit {
+export class MedecinPlanningComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private planningService = inject(PlanningService);
 
   plannings = signal<PlanningItem[]>([]);
   loading = signal(true);
   errorMessage = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
 
-  vueMode = signal<'semaine' | 'mois'>('semaine');
+  filtre = signal<FiltrePeriode>('tous');
 
-  // ---------- Vue semaine ----------
-  debutSemaine = signal<Date>(this.lundiDeLaSemaine(new Date()));
-  jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  // Mis à jour chaque minute pour que le décompte reste juste.
+  maintenant = signal<Date>(new Date());
+  private minuteur?: ReturnType<typeof setInterval>;
 
-  heures: string[] = (() => {
-    const liste: string[] = [];
-    for (let h = 8; h <= 18; h++) {
-      liste.push(`${h.toString().padStart(2, '0')}:00`);
-      if (h < 18) liste.push(`${h.toString().padStart(2, '0')}:30`);
-    }
-    return liste;
-  })();
+  // ---------- Données ----------
+  /** Tous les rendez-vous à venir (ou en cours), triés par date et heure. */
+  tousLesRendezVous = computed<RendezVousAgenda[]>(() => {
+    const maintenant = this.maintenant();
+    const liste: RendezVousAgenda[] = [];
 
-  joursDeLaSemaine = computed(() => {
-    const debut = this.debutSemaine();
-    return this.jours.map((_, i) => {
-      const d = new Date(debut);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
-  });
+    for (const planning of this.plannings()) {
+      if (String(planning.status) === 'inactif') continue;
 
-  libelleSemaine = computed(() => {
-    const jrs = this.joursDeLaSemaine();
-    const fmt = (d: Date) => d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `${fmt(jrs[0])} - ${fmt(jrs[jrs.length - 1])}`;
-  });
+      const dateStr = String(planning.date_planning).substring(0, 10);
 
-  // ---------- Vue mois ----------
-  moisActuel = signal<Date>(this.premierJourDuMois(new Date()));
+      for (const creneau of planning.creneaux ?? []) {
+        if (this.normalizeStatus(creneau.status) !== 'reserve') continue;
 
-  libelleMois = computed(() => {
-    return this.moisActuel().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-  });
+        const brut = (creneau as any).rendezVous ?? (creneau as any).rendez_vous;
+        const rdv = Array.isArray(brut) ? brut.find((r: any) => r?.status !== 'annule') : brut;
+        if (!rdv || rdv.status === 'annule') continue;
 
-  joursDuMois = computed<ResumeJour[]>(() => {
-    const premierJour = this.moisActuel();
-    const anneeMois = premierJour.getMonth();
+        const heure = this.heureCourte(String(creneau.heure_debut));
+        const debut = this.construireDate(dateStr, heure);
+        const heureFin = (creneau as any).heure_fin;
+        const fin = heureFin
+          ? this.construireDate(dateStr, this.heureCourte(String(heureFin)))
+          : new Date(debut.getTime() + 30 * 60000);
 
-    const premierLundi = this.lundiDeLaSemaine(premierJour);
+        if (fin.getTime() < maintenant.getTime()) continue;
 
-    const dernierJourMois = new Date(premierJour.getFullYear(), premierJour.getMonth() + 1, 0);
-    const dernierDimanche = new Date(dernierJourMois);
-    const decalageFin = dernierDimanche.getDay() === 0 ? 0 : 7 - dernierDimanche.getDay();
-    dernierDimanche.setDate(dernierDimanche.getDate() + decalageFin);
-
-    const jours: ResumeJour[] = [];
-    const curseur = new Date(premierLundi);
-
-    while (curseur <= dernierDimanche) {
-      const d = new Date(curseur);
-      const resume = this.resumeDuJour(d);
-      jours.push({
-        date: d,
-        horsMois: d.getMonth() !== anneeMois,
-        disponibles: resume.disponibles,
-        reserves: resume.reserves,
-      });
-      curseur.setDate(curseur.getDate() + 1);
+        liste.push({
+          id: rdv.id ?? creneau.id,
+          date: dateStr,
+          heure,
+          debut,
+          fin,
+          patientNom: rdv.patient ? `${rdv.patient.prenom} ${rdv.patient.nom}` : 'Patient',
+          motif: rdv.motif ?? '',
+          urgent: !!rdv.urgent,
+          status: String(rdv.status ?? ''),
+          numero: rdv.numero_rendez_vous ?? '',
+        });
+      }
     }
 
-    return jours;
+    return liste.sort((a, b) => a.debut.getTime() - b.debut.getTime());
   });
 
-  // ---------- Ajout rapide d'un créneau ----------
-  ajoutOuvert = signal(false);
-  ajoutDate = signal('');
-  ajoutHeure = signal('09:00');
-  ajoutDuree = signal(30);
-  ajoutEnCours = signal(false);
+  prochain = computed<RendezVousAgenda | null>(() => this.tousLesRendezVous()[0] ?? null);
 
-  private lundiDeLaSemaine(date: Date): Date {
-    const d = new Date(date);
-    const jour = d.getDay();
-    const decalage = jour === 0 ? -6 : 1 - jour;
-    d.setDate(d.getDate() + decalage);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
+  listeFiltree = computed<RendezVousAgenda[]>(() => {
+    const tous = this.tousLesRendezVous();
+    const maintenant = this.maintenant();
 
-  private formatDateLocal(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
+    if (this.filtre() === 'aujourdhui') {
+      const aujourdhui = this.jourStr(maintenant);
+      return tous.filter((r) => r.date === aujourdhui);
+    }
 
-  private premierJourDuMois(date: Date): Date {
-    const d = new Date(date.getFullYear(), date.getMonth(), 1);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
+    if (this.filtre() === 'semaine') {
+      const finSemaine = new Date(maintenant);
+      finSemaine.setDate(finSemaine.getDate() + ((7 - finSemaine.getDay()) % 7));
+      finSemaine.setHours(23, 59, 59, 999);
+      return tous.filter((r) => r.debut.getTime() <= finSemaine.getTime());
+    }
 
+    return tous;
+  });
+
+  groupes = computed<GroupeJour[]>(() => {
+    const resultat: GroupeJour[] = [];
+
+    for (const rdv of this.listeFiltree()) {
+      let groupe = resultat.find((g) => g.date === rdv.date);
+      if (!groupe) {
+        groupe = {
+          date: rdv.date,
+          titre: this.titreJour(rdv.date),
+          sousTitre: this.sousTitreJour(rdv.date),
+          items: [],
+        };
+        resultat.push(groupe);
+      }
+      groupe.items.push(rdv);
+    }
+
+    return resultat;
+  });
+
+  // ---------- Cycle de vie ----------
   ngOnInit(): void {
     this.charger();
+    this.minuteur = setInterval(() => this.maintenant.set(new Date()), 60000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.minuteur) clearInterval(this.minuteur);
   }
 
   private charger(): void {
@@ -150,84 +159,80 @@ export class MedecinPlanningComponent implements OnInit {
     });
   }
 
-  // ---------- Navigation ----------
-  semainePrecedente(): void {
-    const d = new Date(this.debutSemaine());
-    d.setDate(d.getDate() - 7);
-    this.debutSemaine.set(d);
+  changerFiltre(filtre: FiltrePeriode): void {
+    this.filtre.set(filtre);
   }
 
-  semaineSuivante(): void {
-    const d = new Date(this.debutSemaine());
-    d.setDate(d.getDate() + 7);
-    this.debutSemaine.set(d);
+  // ---------- Libellés ----------
+  titreJour(dateStr: string): string {
+    const aujourdhui = this.jourStr(new Date());
+    const demain = new Date();
+    demain.setDate(demain.getDate() + 1);
+
+    if (dateStr === aujourdhui) return "Aujourd'hui";
+    if (dateStr === this.jourStr(demain)) return 'Demain';
+    return this.dateLongue(dateStr);
   }
 
-  moisPrecedent(): void {
-    const d = new Date(this.moisActuel());
-    d.setMonth(d.getMonth() - 1);
-    this.moisActuel.set(d);
+  sousTitreJour(dateStr: string): string {
+    const titre = this.titreJour(dateStr);
+    return titre === "Aujourd'hui" || titre === 'Demain' ? this.dateLongue(dateStr) : '';
   }
 
-  moisSuivant(): void {
-    const d = new Date(this.moisActuel());
-    d.setMonth(d.getMonth() + 1);
-    this.moisActuel.set(d);
-  }
+  compteARebours(rdv: RendezVousAgenda): string {
+    const maintenant = this.maintenant();
 
-  aujourdhui(): void {
-    this.debutSemaine.set(this.lundiDeLaSemaine(new Date()));
-    this.moisActuel.set(this.premierJourDuMois(new Date()));
-  }
+    if (maintenant.getTime() >= rdv.debut.getTime()) return 'En cours';
 
-  changerVue(mode: 'semaine' | 'mois'): void {
-    this.vueMode.set(mode);
-  }
+    const minutes = Math.round((rdv.debut.getTime() - maintenant.getTime()) / 60000);
+    if (minutes < 60) return `dans ${Math.max(minutes, 1)} min`;
 
-  // ---------- Lecture des créneaux ----------
-  cellule(jour: Date, heure: string): CelluleCalendrier {
-    const dateStr = this.formatDateLocal(jour);
-    const planning = this.plannings().find((p) => p.date_planning.substring(0, 10) === dateStr || p.date_planning === jour.toLocaleDateString('fr-CA'));
-
-    if (!planning) {
-      return { creneauId: null, status: null, patientNom: null, motif: null };
+    const aujourdhui = this.jourStr(maintenant);
+    if (rdv.date === aujourdhui) {
+      const heures = Math.floor(minutes / 60);
+      const reste = minutes % 60;
+      return reste > 0 ? `dans ${heures} h ${String(reste).padStart(2, '0')}` : `dans ${heures} h`;
     }
 
-    const creneau = planning.creneaux.find((c) => {
-      const heureCreneau = c.heure_debut.includes('T') ? c.heure_debut.split('T')[1].substring(0, 5) : c.heure_debut.substring(0, 5);
-      return heureCreneau === heure;
+    const debutJourRdv = new Date(rdv.debut.getFullYear(), rdv.debut.getMonth(), rdv.debut.getDate()).getTime();
+    const debutJourActuel = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate()).getTime();
+    const jours = Math.round((debutJourRdv - debutJourActuel) / 86400000);
+
+    return jours === 1 ? `demain à ${rdv.heure}` : `dans ${jours} jours`;
+  }
+
+  libelleStatut(status: string): string {
+    if (status === 'confirme') return 'Confirmé';
+    if (status === 'en_attente') return 'En attente';
+    return status;
+  }
+
+  // ---------- Outils de date ----------
+  private dateLongue(dateStr: string): string {
+    const [annee, mois, jour] = dateStr.split('-').map(Number);
+    return new Date(annee, mois - 1, jour).toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
     });
-
-    if (!creneau) {
-      return { creneauId: null, status: null, patientNom: null, motif: null };
-    }
-
-    const rdv = (creneau as any).rendezVous ?? (creneau as any).rendez_vous;
-    const status = this.normalizeStatus(creneau.status);
-
-    return {
-      creneauId: creneau.id,
-      status,
-      patientNom: rdv?.patient ? `${rdv.patient.prenom} ${rdv.patient.nom}` : null,
-      motif: rdv?.motif ?? null,
-    };
   }
 
-  private resumeDuJour(jour: Date): { disponibles: number; reserves: number } {
-    const dateStr = this.formatDateLocal(jour);
-    const planning = this.plannings().find((p) => p.date_planning.substring(0, 10) === dateStr);
-
-    if (!planning) return { disponibles: 0, reserves: 0 };
-
-    return {
-      disponibles: planning.creneaux.filter((c) => this.normalizeStatus(c.status) === 'disponible').length,
-      reserves: planning.creneaux.filter((c) => this.normalizeStatus(c.status) === 'reserve').length,
-    };
+  private jourStr(date: Date): string {
+    const annee = date.getFullYear();
+    const mois = String(date.getMonth() + 1).padStart(2, '0');
+    const jour = String(date.getDate()).padStart(2, '0');
+    return `${annee}-${mois}-${jour}`;
   }
 
-  ouvrirJourDepuisMois(jour: Date): void {
-    this.debutSemaine.set(this.lundiDeLaSemaine(jour));
-    this.vueMode.set('semaine');
+  private heureCourte(heure: string): string {
+    const brut = heure.includes('T') ? heure.split('T')[1] : heure;
+    return brut.substring(0, 5);
+  }
+
+  private construireDate(dateStr: string, heure: string): Date {
+    const [annee, mois, jour] = dateStr.split('-').map(Number);
+    const [h, m] = heure.split(':').map(Number);
+    return new Date(annee, mois - 1, jour, h, m, 0, 0);
   }
 
   private normalizeStatus(status: unknown): string {
@@ -238,87 +243,27 @@ export class MedecinPlanningComponent implements OnInit {
     return raw;
   }
 
-  // ---------- Ajouter un créneau ----------
-  ouvrirAjout(): void {
-    this.ajoutOuvert.set(true);
-    this.ajoutDate.set('');
-    this.ajoutHeure.set('09:00');
-    this.ajoutDuree.set(30);
-  }
-
-  fermerAjout(): void {
-    this.ajoutOuvert.set(false);
-  }
-
-  confirmerAjout(): void {
-    const medecinId = this.auth.currentUser()?.id;
-    const date = this.ajoutDate();
-    if (!medecinId || !date) return;
-
-    this.ajoutEnCours.set(true);
-    this.errorMessage.set(null);
-
-    this.planningService.creerPlanning(medecinId, date).subscribe({
-      next: (res) => this.genererCreneauSurPlanning(res.planning.id),
-      error: (err) => {
-        if (err.status === 409) {
-          const planningExistant = this.plannings().find((p) => p.date_planning.substring(0, 10) === date);
-          if (planningExistant) {
-            this.genererCreneauSurPlanning(planningExistant.id);
-            return;
-          }
-        }
-        this.ajoutEnCours.set(false);
-        this.errorMessage.set('Impossible d\'ajouter ce créneau.');
-      },
-    });
-  }
-
-  private genererCreneauSurPlanning(planningId: number): void {
-    const heureDebut = this.ajoutHeure();
-    const [h, m] = heureDebut.split(':').map(Number);
-    const totalMinutes = h * 60 + m + this.ajoutDuree();
-    const heureFin = `${Math.floor(totalMinutes / 60).toString().padStart(2, '0')}:${(totalMinutes % 60).toString().padStart(2, '0')}`;
-
-    this.planningService.genererCreneaux(planningId, heureDebut, heureFin, this.ajoutDuree()).subscribe({
-      next: () => {
-        this.ajoutEnCours.set(false);
-        this.ajoutOuvert.set(false);
-        this.successMessage.set('Créneau ajouté.');
-        this.charger();
-        setTimeout(() => this.successMessage.set(null), 3000);
-      },
-      error: () => {
-        this.ajoutEnCours.set(false);
-        this.errorMessage.set('Impossible d\'ajouter ce créneau.');
-      },
-    });
-  }
-
   // ---------- Exporter / Imprimer ----------
   imprimer(): void {
     window.print();
   }
 
   exporter(): void {
-    const lignes = ['Jour;Date;Heure;Statut;Patient;Motif'];
+    const nettoyer = (texte: string) => texte.replace(/[;\r\n]+/g, ' ').trim();
+    const lignes = ['Date;Heure;Patient;Motif;Statut'];
 
-    this.joursDeLaSemaine().forEach((jour, i) => {
-      this.heures.forEach((heure) => {
-        const c = this.cellule(jour, heure);
-        if (c.status) {
-          const dateStr = jour.toLocaleDateString('fr-FR');
-          lignes.push(`${this.jours[i]};${dateStr};${heure};${c.status};${c.patientNom ?? ''};${c.motif ?? ''}`);
-        }
-      });
-    });
+    for (const rdv of this.listeFiltree()) {
+      const date = new Date(rdv.debut).toLocaleDateString('fr-FR');
+      lignes.push(
+        `${date};${rdv.heure};${nettoyer(rdv.patientNom)};${nettoyer(rdv.motif)};${this.libelleStatut(rdv.status)}`
+      );
+    }
 
-    const contenu = lignes.join('\n');
-    const blob = new Blob([contenu], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + lignes.join('\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const lien = document.createElement('a');
     lien.href = url;
-    lien.download = `planning-${this.libelleSemaine().replace(/\s/g, '')}.csv`;
+    lien.download = 'mes-rendez-vous.csv';
     lien.click();
     URL.revokeObjectURL(url);
   }

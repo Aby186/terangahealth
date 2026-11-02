@@ -1,0 +1,54 @@
+<div class="page">
+
+  <div class="page-header">
+    <h1>Historique des paiements</h1>
+    <p>Consultez les paiements effectués par les patients pour leurs consultations.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-box">{{ errorMessage() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="state-message">Chargement des paiements...</div>
+  }
+
+  @if (!loading() && paiements().length > 0) {
+    <div class="toolbar">
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+        <input type="text" placeholder="Rechercher un patient, un médecin ou une référence..." [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" />
+      </div>
+      <div class="resume">
+        <span>{{ paiementsFiltres().length }} paiement{{ paiementsFiltres().length > 1 ? 's' : '' }}</span>
+        <strong>{{ formatMontant(totalMontant()) }} FCFA encaissés</strong>
+      </div>
+    </div>
+  }
+
+  @if (!loading() && paiements().length === 0) {
+    <div class="state-message">Aucun paiement enregistré pour l'instant.</div>
+  }
+
+  @if (!loading() && paiements().length > 0 && paiementsFiltres().length === 0) {
+    <div class="state-message">Aucun paiement ne correspond à votre recherche.</div>
+  }
+
+  <div class="paiements-list">
+    @for (p of paiementsFiltres(); track p.id) {
+      <div class="paiement-card">
+        <div class="paiement-info">
+          <strong>{{ nomPatient(p) }}</strong>
+          <span>{{ nomMedecin(p) }} — {{ service(p) }}</span>
+          <span class="ref">Réf. {{ reference(p) }}</span>
+        </div>
+        <div class="paiement-right">
+          <span class="montant">{{ formatMontant(p.montant) }} FCFA</span>
+          <span class="statut" [class]="'statut-' + p.statut">{{ statutLabel(p.statut) }}</span>
+          <span class="date">{{ formatDate(p.date_paiement) }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

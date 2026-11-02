@@ -153,6 +153,13 @@
 .status-disponible { background: #D7F4F6; color: #0E6E75; }
 .status-reserve { background: #FEF3C7; color: #92400E; }
 .status-annule { background: #F1F5F9; color: #64748B; }
+.status-indisponible {
+  background: #F1F5F9; color: #475569; border: 1px dashed #CBD5E1;
+}
+.creneau-indisponible-badge {
+  font-size: 10px; font-weight: 700; background: #E2E8F0; color: #475569;
+  border-radius: 999px; padding: 2px 8px;
+}
 .btn-suppr-creneau {
   width: 14px; height: 14px; border-radius: 999px; border: none;
   background: rgba(0,0,0,.1); color: inherit; display: flex; align-items: center; justify-content: center;

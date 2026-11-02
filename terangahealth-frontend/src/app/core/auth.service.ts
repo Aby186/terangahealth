@@ -10,6 +10,9 @@ export interface User {
   prenom: string;
   email: string;
   telephone?: string;
+  adresse?: string;
+  date_naissance?: string;
+  sexe?: string;
   role: 'patient' | 'medecin' | 'secretaire' | 'administrateur';
   code_patient?: string;
   matricule?: string;
@@ -73,6 +76,22 @@ export class AuthService {
     localStorage.removeItem('user');
     this.currentUser.set(null);
     this.router.navigate(['/connexion']);
+  }
+
+  modifierProfil(data: Partial<{ nom: string; prenom: string; telephone: string; adresse: string; date_naissance: string; sexe: string; email: string }>): Observable<{ message: string; user: User }> {
+    return this.http.put<{ message: string; user: User }>(`${this.apiUrl}/mon-compte`, data).pipe(
+      tap((res) => {
+        localStorage.setItem('user', JSON.stringify(res.user));
+        this.currentUser.set(res.user);
+      })
+    );
+  }
+
+  supprimerCompte(password: string) {
+    const url = `${this.apiUrl}/mon-compte`;
+    return this.http.request<{ message: string }>('DELETE', url, { body: { password } }).pipe(
+      tap(() => this.clearSession()),
+    );
   }
 
   private getStoredUser(): User | null {

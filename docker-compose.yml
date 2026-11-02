@@ -1,0 +1,43 @@
+name: terangahealth
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: terangahealth
+      POSTGRES_USER: teranga
+      POSTGRES_PASSWORD: teranga_dev_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U teranga -d terangahealth"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./terangahealth-backend
+    env_file: ./terangahealth-backend/.env
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: terangahealth
+      DB_USERNAME: teranga
+      DB_PASSWORD: teranga_dev_password
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:80"
+    command: sh -c "php artisan migrate --force && apache2-foreground"
+
+  frontend:
+    build: ./terangahealth-frontend
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  pgdata:

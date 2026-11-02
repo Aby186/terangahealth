@@ -2,7 +2,7 @@
 
   <div class="page-header">
     <h1>Nos services</h1>
-    <p>Découvrez l'ensemble des spécialités proposées par la clinique.</p>
+    <p>Choisissez un service pour voir ses médecins, consulter leur planning et prendre rendez-vous.</p>
   </div>
 
   @if (loading()) {
@@ -24,6 +24,17 @@
 
         <h3>{{ service.nom }}</h3>
         <p class="description">{{ service.description }}</p>
+
+        @if (prix(service)) {
+          <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#0f7f87;">
+            Consultation : {{ prix(service) }}
+          </p>
+        }
+
+        <button type="button" class="btn-medecins" (click)="voirMedecins(service.nom)">
+          Voir les médecins
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </button>
       </div>
     }
   </div>

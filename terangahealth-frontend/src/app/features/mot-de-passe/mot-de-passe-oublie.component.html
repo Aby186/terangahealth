@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="carte">
+
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.4-9.5-9C.7 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.4C11.6 6 13 5 15 5c3.6 0 5.3 3.4 3.5 7-2.5 4.6-9.5 9-9.5 9z" fill="#1FAAB4" /></svg>
+      <span>TerangaHealth</span>
+    </div>
+
+    <h1>Mot de passe oublié ?</h1>
+
+    @if (message()) {
+      <div class="success-box">{{ message() }}</div>
+      <p class="intro">Pensez à vérifier vos courriers indésirables si vous ne voyez rien dans quelques minutes.</p>
+    } @else {
+      <p class="intro">
+        Saisissez l'adresse e-mail de votre compte. Nous vous enverrons un lien pour choisir un nouveau mot de passe.
+      </p>
+
+      @if (errorMessage()) {
+        <div class="error-box">{{ errorMessage() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label for="email">Adresse e-mail</label>
+          <input id="email" type="email" formControlName="email" placeholder="vous@exemple.com" autocomplete="email" />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <p class="field-error">Veuillez saisir une adresse e-mail valide.</p>
+          }
+        </div>
+
+        <button type="submit" class="btn-principal" [disabled]="loading()">
+          {{ loading() ? 'Envoi en cours...' : 'Envoyer le lien' }}
+        </button>
+      </form>
+    }
+
+    <a routerLink="/connexion" class="retour">← Retour à la connexion</a>
+
+  </div>
+</div>

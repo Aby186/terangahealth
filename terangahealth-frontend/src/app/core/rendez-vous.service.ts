@@ -42,6 +42,17 @@ export interface RendezVousResponse {
   rendez_vous: RendezVousItem;
 }
 
+export interface AlertesReprogrammationResponse {
+  total: number;
+  rendez_vous: RendezVousItem[];
+}
+
+export interface NotifierReprogrammationResponse {
+  email_envoye: boolean;
+  patient_a_email: boolean;
+  sms: 'envoye' | 'simule' | 'non_envoye';
+}
+
 @Injectable({ providedIn: 'root' })
 export class RendezVousService {
   private http = inject(HttpClient);
@@ -71,7 +82,18 @@ export class RendezVousService {
     return this.http.put<RendezVousResponse>(`${this.apiUrl}/rendez-vous/${id}/reprogrammer`, { creneau_id: creneauId });
   }
 
+  notifierReprogrammation(id: number, ancienneDate: string, ancienneHeure: string): Observable<NotifierReprogrammationResponse> {
+    return this.http.post<NotifierReprogrammationResponse>(`${this.apiUrl}/rendez-vous/${id}/notifier-reprogrammation`, {
+      ancienne_date: ancienneDate,
+      ancienne_heure: ancienneHeure,
+    });
+  }
+
   supprimer(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/rendez-vous/${id}`);
+  }
+
+  alertesReprogrammation(): Observable<AlertesReprogrammationResponse> {
+    return this.http.get<AlertesReprogrammationResponse>(`${this.apiUrl}/alertes/reprogrammation`);
   }
 }

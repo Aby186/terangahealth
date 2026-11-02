@@ -22,6 +22,9 @@ export class MedecinGestionPlanningComponent implements OnInit {
 
   nouvelleDate = signal('');
   creationEnCours = signal(false);
+  dateRecherche = signal('');
+  resultatRecherche = signal<PlanningItem | null>(null);
+  messageRecherche = signal<string | null>(null);
 
   planningOuvertPourGenerationId = signal<number | null>(null);
   heureDebutGen = signal('09:00');
@@ -30,9 +33,49 @@ export class MedecinGestionPlanningComponent implements OnInit {
   generationEnCours = signal(false);
 
   traitementEnCoursId = signal<number | null>(null);
+  creneauTraitementId = signal<number | null>(null);
 
   private medecinId(): number | null {
     return this.auth.currentUser()?.id ?? null;
+  }
+
+  todayLocalDateString(): string {
+    const now = new Date();
+    return this.formatInputDate(now);
+  }
+
+  private formatInputDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Les dates venant du serveur peuvent contenir une heure
+   * (ex. 2026-08-04T00:00:00.000000Z) : on ne garde que AAAA-MM-JJ.
+   */
+  private toLocalDate(dateValue: string): Date {
+    const [year, month, day] = dateValue.substring(0, 10).split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private isDatePasse(dateValue: string): boolean {
+    if (!dateValue) {
+      return false;
+    }
+
+    return this.toLocalDate(dateValue) < this.toLocalDate(this.todayLocalDateString());
+  }
+
+  canModifyPlanning(planning: PlanningItem | null): boolean {
+    return !!planning && !this.isDatePasse(planning.date_planning);
+  }
+
+  get planningsFuturs(): PlanningItem[] {
+    return [...this.plannings()]
+      .filter((planning) => !this.isDatePasse(planning.date_planning))
+      .sort((a, b) => this.toLocalDate(a.date_planning).getTime() - this.toLocalDate(b.date_planning).getTime());
   }
 
   ngOnInit(): void {
@@ -47,7 +90,10 @@ export class MedecinGestionPlanningComponent implements OnInit {
     this.errorMessage.set(null);
     this.planningService.getPlannings(id).subscribe({
       next: (data) => {
-        this.plannings.set(data);
+        const sorted = [...data].sort(
+          (a, b) => this.toLocalDate(a.date_planning).getTime() - this.toLocalDate(b.date_planning).getTime()
+        );
+        this.plannings.set(sorted);
         this.loading.set(false);
       },
       error: () => {
@@ -57,10 +103,41 @@ export class MedecinGestionPlanningComponent implements OnInit {
     });
   }
 
+  rechercherJournee(): void {
+    const date = this.dateRecherche().trim();
+    if (!date) {
+      this.resultatRecherche.set(null);
+      this.messageRecherche.set(null);
+      return;
+    }
+
+    const planningTrouve = this.plannings().find((planning) => planning.date_planning.substring(0, 10) === date);
+
+    if (planningTrouve) {
+      this.resultatRecherche.set(planningTrouve);
+      this.messageRecherche.set(null);
+      return;
+    }
+
+    this.resultatRecherche.set(null);
+    this.messageRecherche.set('Aucune journée trouvée pour cette date.');
+  }
+
+  effacerRecherche(): void {
+    this.dateRecherche.set('');
+    this.resultatRecherche.set(null);
+    this.messageRecherche.set(null);
+  }
+
   creerPlanning(): void {
     const id = this.medecinId();
     const date = this.nouvelleDate();
     if (!id || !date) return;
+
+    if (this.isDatePasse(date)) {
+      this.errorMessage.set("Choisissez une date à partir d'aujourd'hui.");
+      return;
+    }
 
     this.creationEnCours.set(true);
     this.errorMessage.set(null);
@@ -113,6 +190,19 @@ export class MedecinGestionPlanningComponent implements OnInit {
   }
 
   toggleStatus(planningId: number): void {
+    const planning = this.plannings().find((item) => item.id === planningId);
+    if (planning?.status === 'actif') {
+      const rendezVousReserve = (planning.creneaux ?? []).filter((creneau) => creneau.status === 'reserve').length;
+      if (rendezVousReserve > 0) {
+        const confirmation = confirm(
+          `Cette journée contient ${rendezVousReserve} rendez-vous réservés.\nEn la désactivant, la secrétaire devra les reprogrammer.\nContinuer ?`
+        );
+        if (!confirmation) {
+          return;
+        }
+      }
+    }
+
     this.traitementEnCoursId.set(planningId);
     this.planningService.toggleStatus(planningId).subscribe({
       next: () => {
@@ -153,10 +243,35 @@ export class MedecinGestionPlanningComponent implements OnInit {
     });
   }
 
+  bloquerCreneau(creneauId: number, statut: string): void {
+    if (statut === 'reserve') {
+      const confirmation = confirm(
+        'Ce créneau contient un rendez-vous.\nEn le désactivant, la secrétaire devra le reprogrammer.\nContinuer ?'
+      );
+      if (!confirmation) {
+        return;
+      }
+    }
+
+    this.creneauTraitementId.set(creneauId);
+    this.planningService.bloquerCreneau(creneauId).subscribe({
+      next: (reponse) => {
+        this.creneauTraitementId.set(null);
+        this.successMessage.set(reponse.message);
+        this.charger();
+        setTimeout(() => this.successMessage.set(null), 3000);
+      },
+      error: (err) => {
+        this.creneauTraitementId.set(null);
+        this.errorMessage.set(err.error?.message ?? 'Impossible de modifier ce créneau.');
+      },
+    });
+  }
+
   formatDate(dateStr: string): string {
     const jours = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
     const mois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-    const date = new Date(dateStr);
+    const date = this.toLocalDate(dateStr);
     return `${jours[date.getDay()]} ${date.getDate()} ${mois[date.getMonth()]}`;
   }
 }

@@ -17,7 +17,7 @@
 
 * { box-sizing: border-box; }
 
-.page { max-width: 900px; margin: 0; padding: 40px 40px 80px; }
+.page { max-width: 1180px; margin: 0; padding: 40px 40px 80px; }
 
 .page-header-box {
   background: #fff;
@@ -41,17 +41,40 @@
   padding: 12px 16px; border-radius: 10px; font-size: 13.5px; margin-bottom: 16px;
 }
 
-.new-planning-box {
-  background: #fff; border: 1px solid var(--line); border-radius: 16px;
-  padding: 18px 20px; margin-bottom: 24px;
+/* Ligne du haut : « Ajouter une journée » et « Rechercher une journée » alignées */
+.top-row {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  margin-bottom: 24px;
 }
-.new-planning-box label { font-size: 12px; font-weight: 600; color: var(--ink-900); display: block; margin-bottom: 8px; }
+
+.new-planning-box,
+.search-planning-box {
+  background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  padding: 18px 20px;
+}
+.new-planning-box { flex: 1 1 auto; }
+.search-planning-box { flex: 0 0 380px; }
+
+.new-planning-box label,
+.search-planning-box label {
+  font-size: 12px; font-weight: 600; color: var(--ink-900); display: block; margin-bottom: 8px;
+}
+
 .new-planning-row { display: flex; gap: 10px; flex-wrap: wrap; }
-.new-planning-row input[type="date"] {
+.search-planning-row { display: flex; gap: 10px; flex-wrap: nowrap; }
+
+.new-planning-row input[type="date"],
+.search-planning-row input[type="date"] {
   padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
   background: #F7FBFC; font-size: 13.5px; color: var(--ink-900); outline: none; font-family: inherit;
 }
-.new-planning-row input[type="date"]:focus { border-color: var(--teal-500); box-shadow: 0 0 0 3px rgba(31,170,180,.12); }
+.search-planning-row input[type="date"] { flex: 1 1 auto; min-width: 0; }
+.new-planning-row input[type="date"]:focus,
+.search-planning-row input[type="date"]:focus {
+  border-color: var(--teal-500); box-shadow: 0 0 0 3px rgba(31,170,180,.12);
+}
 
 .btn-primary {
   padding: 10px 20px; border: none; border-radius: 999px;
@@ -60,6 +83,33 @@
 }
 .btn-primary:hover:not(:disabled) { background: #17929a; }
 .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Bouton « Rechercher » : version discrète du bouton principal */
+.btn-search {
+  flex: 0 0 auto;
+  padding: 10px 20px; border-radius: 999px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; border: 1px solid #A9E0E4;
+  background: #fff; color: #0E6E75; transition: background .2s var(--ease);
+}
+.btn-search:hover { background: #F4FCFD; }
+
+/* Résultat de la recherche */
+.search-result-panel { margin-bottom: 24px; }
+.search-result-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 10px; font-size: 13px; font-weight: 700; color: var(--ink-900);
+}
+.search-result-clear {
+  border: none; background: none; padding: 0; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  color: #0E6E75; text-decoration: underline;
+}
+.search-result-clear:hover { color: #17929a; }
+.search-message {
+  margin: 0; padding: 14px 16px; background: #fff;
+  border: 1px dashed var(--line); border-radius: 12px;
+  font-size: 13px; color: var(--ink-500);
+}
 
 .state-message { text-align: center; padding: 30px; color: var(--ink-500); font-size: 14px; }
 .empty-state {
@@ -140,16 +190,37 @@
 .creneau-chip {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  border: 1px solid transparent;
 }
 .status-disponible { background: #D7F4F6; color: #0E6E75; }
 .status-reserve { background: #FEF3C7; color: #92400E; }
 .status-annule { background: #F1F5F9; color: #64748B; }
+.status-indisponible {
+  background: #F1F5F9; color: #475569; border: 1px dashed #CBD5E1;
+}
+.creneau-indisponible-badge {
+  font-size: 10px; font-weight: 700; background: #E2E8F0; color: #475569;
+  border-radius: 999px; padding: 2px 8px;
+}
+.btn-bloquer {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  border: none; background: rgba(15, 23, 42, 0.08); color: inherit; border-radius: 999px;
+  font-size: 10.5px; font-weight: 700; cursor: pointer; padding: 4px 7px; font-family: inherit;
+}
+.btn-bloquer:disabled { opacity: .65; cursor: not-allowed; }
 .btn-suppr-creneau {
   width: 14px; height: 14px; border-radius: 999px; border: none;
   background: rgba(0,0,0,.1); color: inherit; display: flex; align-items: center; justify-content: center;
   cursor: pointer; padding: 0;
 }
 .btn-suppr-creneau:hover { background: rgba(0,0,0,.2); }
+
+/* Écran étroit : la recherche passe sous « Ajouter une journée » */
+@media (max-width: 900px) {
+  .top-row { flex-wrap: wrap; }
+  .new-planning-box,
+  .search-planning-box { flex: 1 1 100%; }
+}
 
 @media (max-width: 600px) {
   .page { padding: 32px 20px 60px; }

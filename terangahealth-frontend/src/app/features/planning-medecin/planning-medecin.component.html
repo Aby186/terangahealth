@@ -1,0 +1,51 @@
+<div class="page">
+
+  <a routerLink="/medecins" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+    Retour aux médecins
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h1>Planning de {{ nomComplet() }}</h1>
+      @if (medecin()?.service) {
+        <p>{{ medecin()!.service!.nom }} — créneaux disponibles des 10 prochains jours</p>
+      }
+    </div>
+    <a [routerLink]="['/prendre-rdv', medecinId()]" class="btn-rdv">
+      Prendre rendez-vous
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="state-message">Chargement du planning...</div>
+  }
+
+  @if (errorMessage()) {
+    <div class="state-message error">{{ errorMessage() }}</div>
+  }
+
+  @if (!loading() && !errorMessage() && jours().length === 0) {
+    <div class="state-message">
+      Aucun créneau disponible pour le moment. Vous pouvez tout de même continuer vers la prise de rendez-vous pour rejoindre la liste d'attente.
+    </div>
+  }
+
+  <div class="jours-list">
+    @for (jour of jours(); track jour.date) {
+      <div class="jour-card">
+        <div class="jour-head">
+          <h3>{{ jour.libelle }}</h3>
+          <span class="count">{{ jour.creneaux.length }} créneau{{ jour.creneaux.length > 1 ? 'x' : '' }}</span>
+        </div>
+        <div class="creneaux">
+          @for (creneau of jour.creneaux; track creneau.id) {
+            <span class="creneau">{{ creneau.heure_debut.substring(0, 5) }}</span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

@@ -4,15 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Creneau;
 use App\Models\Planning;
+use App\Models\RendezVous;
 use App\Models\User;
+use App\Services\AlerteBlocageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
 class PlanningController extends Controller
 {
+    public function __construct(private AlerteBlocageService $alerte)
+    {
+    }
+
     /**
      * Liste les plannings d'un médecin (avec leurs créneaux), triés par date.
+     * Les créneaux sont triés par heure : sans tri explicite, PostgreSQL les renvoie
+     * dans l'ordre de stockage, qui change dès qu'un créneau est modifié.
+     * Consultation en lecture seule — accessible aussi à la secrétaire/admin
+     * pour vérifier les disponibilités avant une reprogrammation.
      * GET /api/plannings?medecin_id=2
      */
     public function index(Request $request)
@@ -25,26 +35,44 @@ class PlanningController extends Controller
             return response()->json(['message' => 'Données invalides.', 'errors' => $validator->errors()], 422);
         }
 
-        $plannings = Planning::with('creneaux.rendezVous.patient')
+        $plannings = Planning::with([
+                'creneaux' => fn ($query) => $query->orderBy('heure_debut'),
+                'creneaux.rendezVous.patient',
+            ])
             ->where('medecin_id', $request->medecin_id)
             ->orderBy('date_planning')
             ->get();
 
         return response()->json($plannings);
     }
+
     /**
-     * Vérifie que l'utilisateur a le droit de gérer le planning de ce médecin :
-     * secrétaire/admin peuvent gérer tous les médecins, un médecin ne gère que le sien.
+     * Vérifie que l'utilisateur a le droit de MODIFIER le planning de ce médecin :
+     * uniquement le médecin lui-même (ou l'admin, pour la maintenance technique).
+     * La secrétaire n'a plus que la lecture (via index()).
      */
     private function autoriseAGerer(Request $request, int $medecinId): bool
     {
         $user = $request->user();
 
-        if ($user->isSecretaire() || $user->isAdmin()) {
+        if ($user->isAdmin()) {
             return true;
         }
 
         return $user->isMedecin() && $user->id === $medecinId;
+    }
+
+    /**
+     * La date du planning peut arriver avec une heure (2026-10-23 00:00:00) :
+     * on ne garde que AAAA-MM-JJ avant de la comparer à aujourd'hui.
+     */
+    private function estJourneePassee(mixed $datePlanning): bool
+    {
+        $timezone = config('app.timezone', 'Europe/Paris');
+        $jour = substr((string) $datePlanning, 0, 10);
+        $date = Carbon::createFromFormat('!Y-m-d', $jour, $timezone);
+
+        return $date->lt(Carbon::now($timezone)->startOfDay());
     }
 
     /**
@@ -55,11 +83,15 @@ class PlanningController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'medecin_id'    => 'required|exists:users,id',
-            'date_planning' => 'required|date|after_or_equal:today',
+            'date_planning' => 'required|date',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => 'Données invalides.', 'errors' => $validator->errors()], 422);
+        }
+
+        if ($this->estJourneePassee($request->date_planning)) {
+            return response()->json(['message' => 'Cette journée est déjà passée.'], 422);
         }
 
         if (! $this->autoriseAGerer($request, (int) $request->medecin_id)) {
@@ -139,6 +171,8 @@ class PlanningController extends Controller
 
     /**
      * Active ou désactive un planning (ex: jour de congé).
+     * Si on désactive une journée qui porte des rendez-vous, les patients
+     * et la secrétaire sont prévenus.
      * PUT /api/plannings/{planning}/toggle
      */
     public function toggleStatus(Request $request, Planning $planning)
@@ -147,12 +181,34 @@ class PlanningController extends Controller
             return response()->json(['message' => 'Vous ne pouvez gérer que votre propre planning.'], 403);
         }
 
+        if ($this->estJourneePassee($planning->date_planning)) {
+            return response()->json(['message' => 'Cette journée est déjà passée.'], 422);
+        }
+
+        $desactive = $planning->status === 'actif';
+
         $planning->update([
-            'status' => $planning->status === 'actif' ? 'inactif' : 'actif',
+            'status' => $desactive ? 'inactif' : 'actif',
         ]);
 
+        $nbPrevenus = 0;
+
+        if ($desactive) {
+            $rdvs = RendezVous::whereIn('creneau_id', $planning->creneaux()->pluck('id'))
+                ->whereIn('status', ['en_attente', 'confirme'])
+                ->get();
+
+            foreach ($rdvs as $rdv) {
+                $this->alerte->prevenir($rdv);
+            }
+
+            $nbPrevenus = $rdvs->count();
+        }
+
         return response()->json([
-            'message'  => 'Statut du planning mis à jour.',
+            'message'  => $nbPrevenus > 0
+                ? "Journée désactivée. {$nbPrevenus} patient(s) et la secrétaire ont été prévenus ; les rendez-vous sont à reprogrammer."
+                : 'Statut du planning mis à jour.',
             'planning' => $planning,
         ]);
     }

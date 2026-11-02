@@ -1,0 +1,65 @@
+<div class="page">
+  <div class="carte">
+
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.4-9.5-9C.7 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.4C11.6 6 13 5 15 5c3.6 0 5.3 3.4 3.5 7-2.5 4.6-9.5 9-9.5 9z" fill="#1FAAB4" /></svg>
+      <span>TerangaHealth</span>
+    </div>
+
+    @if (!lienPresent()) {
+
+      <h1>Lien incomplet</h1>
+      <div class="error-box">Ce lien n'est pas valide. Veuillez refaire une demande de réinitialisation.</div>
+      <a routerLink="/mot-de-passe-oublie" class="btn-lien">Refaire une demande</a>
+
+    } @else if (termine()) {
+
+      <h1>Mot de passe modifié</h1>
+      <div class="success-box">{{ message() }}</div>
+      <a routerLink="/connexion" class="btn-lien">Aller à la connexion</a>
+
+    } @else {
+
+      <h1>Nouveau mot de passe</h1>
+      <p class="intro">Choisissez un nouveau mot de passe pour votre compte.</p>
+
+      @if (errorMessage()) {
+        <div class="error-box">
+          {{ errorMessage() }}
+          <a routerLink="/mot-de-passe-oublie" class="lien-inline">Refaire une demande</a>
+        </div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="field">
+          <label for="password">Nouveau mot de passe</label>
+          <input id="password" [type]="afficher() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" />
+          <p class="aide">Au moins 8 caractères.</p>
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <p class="field-error">Le mot de passe doit contenir au moins 8 caractères.</p>
+          }
+        </div>
+
+        <div class="field">
+          <label for="confirmation">Confirmer le mot de passe</label>
+          <input id="confirmation" [type]="afficher() ? 'text' : 'password'" formControlName="password_confirmation" autocomplete="new-password" />
+          @if (form.errors?.['mismatch'] && form.get('password_confirmation')?.touched) {
+            <p class="field-error">Les deux mots de passe ne correspondent pas.</p>
+          }
+        </div>
+
+        <label class="afficher">
+          <input type="checkbox" [checked]="afficher()" (change)="basculerAffichage()" />
+          Afficher les mots de passe
+        </label>
+
+        <button type="submit" class="btn-principal" [disabled]="loading()">
+          {{ loading() ? 'Enregistrement...' : 'Enregistrer le mot de passe' }}
+        </button>
+      </form>
+    }
+
+    <a routerLink="/connexion" class="retour">← Retour à la connexion</a>
+
+  </div>
+</div>

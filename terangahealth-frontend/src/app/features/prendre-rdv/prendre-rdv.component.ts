@@ -1,11 +1,11 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MedecinsService, Medecin, Creneau } from '../../core/medecins.service';
-import { RendezVousService } from '../../core/rendez-vous.service';
 import { ListeAttenteService } from '../../core/liste-attente.service';
+import { PaiementService } from '../../core/paiement.service';
 
 @Component({
   selector: 'app-prendre-rdv',
@@ -17,10 +17,9 @@ import { ListeAttenteService } from '../../core/liste-attente.service';
 export class PrendreRdvComponent implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private medecinsService = inject(MedecinsService);
-  private rendezVousService = inject(RendezVousService);
   private listeAttenteService = inject(ListeAttenteService);
+  private paiementService = inject(PaiementService);
 
   // liste complète, utilisée uniquement si on arrive sans medecinId dans l'URL
   tousLesMedecins = signal<Medecin[]>([]);
@@ -104,8 +103,8 @@ export class PrendreRdvComponent implements OnInit {
     this.submitting.set(true);
     this.errorMessage.set(null);
 
-    this.rendezVousService
-      .creer({
+    this.paiementService
+      .initier({
         medecin_id: Number(this.form.value.medecin_id),
         creneau_id: Number(this.form.value.creneau_id),
         motif: this.form.value.motif!,
@@ -113,13 +112,11 @@ export class PrendreRdvComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.submitting.set(false);
-          this.successMessage.set(res.message);
-          setTimeout(() => this.router.navigate(['/mes-rendez-vous']), 2000);
+          window.location.href = res.url_paiement;
         },
         error: (err: HttpErrorResponse) => {
           this.submitting.set(false);
-          this.errorMessage.set(err.error?.message ?? 'Une erreur est survenue.');
+          this.errorMessage.set(err.error?.message ?? 'Impossible d\'initier le paiement.');
         },
       });
   }

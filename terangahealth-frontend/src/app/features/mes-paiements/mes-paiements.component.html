@@ -1,0 +1,37 @@
+<div class="page">
+  <div class="page-header-box">
+    <h1>Mes paiements</h1>
+    <p>Historique de vos consultations réglées en ligne.</p>
+  </div>
+
+  @if (errorMessage()) { <div class="error-box">{{ errorMessage() }}</div> }
+  @if (loading()) { <div class="state-message">Chargement...</div> }
+  @if (!loading() && paiements().length === 0) {
+    <div class="empty-state"><p>Aucun paiement enregistré pour l'instant.</p></div>
+  }
+
+  <div class="paiements-list">
+    @for (p of paiements(); track p.id) {
+      <div class="paiement-card">
+        <div class="paiement-info">
+          <strong>{{ p.rendez_vous?.service?.nom ?? 'Consultation' }}</strong>
+          <span>Dr {{ p.rendez_vous?.medecin?.prenom }} {{ p.rendez_vous?.medecin?.nom }}</span>
+          <span class="ref">Réf. {{ p.rendez_vous?.numero_rendez_vous }}</span>
+        </div>
+        <div class="paiement-right">
+          <span class="montant">{{ p.montant }} FCFA</span>
+          <span class="statut" [class]="'statut-' + p.statut">{{ statutLabel(p.statut) }}</span>
+          <span class="date">{{ formatDate(p.date_paiement) }}</span>
+          @if (p.statut === 'paye') {
+            <button type="button" class="btn-facture" (click)="ouvrirFacture(p)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Télécharger la facture
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<app-facture [paiement]="paiementSelectionne()" [open]="factureOuverte()" (close)="factureOuverte.set(false)" />

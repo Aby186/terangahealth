@@ -16,12 +16,17 @@ export interface OrienterResponse {
   services: ServiceRecommande[];
 }
 
+export interface HistoriqueChatMessage {
+  role: 'patient' | 'assistant';
+  texte: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatbotService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  orienter(message: string): Observable<OrienterResponse> {
-    return this.http.post<OrienterResponse>(`${this.apiUrl}/chatbot/orienter`, { message });
+  orienter(message: string, historique: HistoriqueChatMessage[] = []): Observable<OrienterResponse> {
+    return this.http.post<OrienterResponse>(`${this.apiUrl}/chatbot/orienter`, { message, historique });
   }
 }

@@ -22,17 +22,6 @@ export class GestionPlanningComponent implements OnInit {
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
-  nouvelleDate = signal('');
-  creationEnCours = signal(false);
-
-  planningOuvertPourGenerationId = signal<number | null>(null);
-  heureDebutGen = signal('09:00');
-  heureFinGen = signal('17:00');
-  dureeGen = signal(30);
-  generationEnCours = signal(false);
-
-  traitementEnCoursId = signal<number | null>(null);
-
   ngOnInit(): void {
     this.medecinsService.getMedecins().subscribe({
       next: (data) => this.medecins.set(data),
@@ -56,108 +45,6 @@ export class GestionPlanningComponent implements OnInit {
       error: () => {
         this.errorMessage.set('Impossible de charger le planning.');
         this.loading.set(false);
-      },
-    });
-  }
-
-  creerPlanning(): void {
-    const medecinId = this.medecinSelectionneId();
-    const date = this.nouvelleDate();
-    if (!medecinId || !date) return;
-
-    this.creationEnCours.set(true);
-    this.errorMessage.set(null);
-
-    this.planningService.creerPlanning(medecinId, date).subscribe({
-      next: (res) => {
-        this.creationEnCours.set(false);
-        this.successMessage.set(res.message);
-        this.nouvelleDate.set('');
-        this.charger(medecinId);
-        setTimeout(() => this.successMessage.set(null), 3000);
-      },
-      error: (err: any) => {
-        this.creationEnCours.set(false);
-        this.errorMessage.set(err.error?.message ?? 'Impossible de créer le planning.');
-      },
-    });
-  }
-
-  ouvrirGenerationCreneaux(planningId: number): void {
-    this.planningOuvertPourGenerationId.set(planningId);
-    this.heureDebutGen.set('09:00');
-    this.heureFinGen.set('17:00');
-    this.dureeGen.set(30);
-  }
-
-  fermerGenerationCreneaux(): void {
-    this.planningOuvertPourGenerationId.set(null);
-  }
-
-  genererCreneaux(planningId: number): void {
-    this.generationEnCours.set(true);
-    this.errorMessage.set(null);
-
-    this.planningService
-      .genererCreneaux(planningId, this.heureDebutGen(), this.heureFinGen(), this.dureeGen())
-      .subscribe({
-        next: (res) => {
-          this.generationEnCours.set(false);
-          this.successMessage.set(res.message);
-          this.planningOuvertPourGenerationId.set(null);
-          const medecinId = this.medecinSelectionneId();
-          if (medecinId) this.charger(medecinId);
-          setTimeout(() => this.successMessage.set(null), 3000);
-        },
-        error: (err) => {
-          this.generationEnCours.set(false);
-          this.errorMessage.set(err.error?.message ?? 'Impossible de générer les créneaux.');
-        },
-      });
-  }
-
-  toggleStatus(planningId: number): void {
-    this.traitementEnCoursId.set(planningId);
-    this.planningService.toggleStatus(planningId).subscribe({
-      next: () => {
-        this.traitementEnCoursId.set(null);
-        const medecinId = this.medecinSelectionneId();
-        if (medecinId) this.charger(medecinId);
-      },
-      error: () => {
-        this.traitementEnCoursId.set(null);
-        this.errorMessage.set('Impossible de modifier le statut du planning.');
-      },
-    });
-  }
-
-  supprimerPlanning(planningId: number): void {
-    if (!confirm('Supprimer définitivement cette journée de planning ?')) return;
-
-    this.traitementEnCoursId.set(planningId);
-    this.planningService.supprimerPlanning(planningId).subscribe({
-      next: () => {
-        this.traitementEnCoursId.set(null);
-        const medecinId = this.medecinSelectionneId();
-        if (medecinId) this.charger(medecinId);
-      },
-      error: (err: any) => {
-        this.traitementEnCoursId.set(null);
-        this.errorMessage.set(err.error?.message ?? 'Impossible de supprimer ce planning.');
-      },
-    });
-  }
-
-  supprimerCreneau(creneauId: number): void {
-    if (!confirm('Supprimer ce créneau ?')) return;
-
-    this.planningService.supprimerCreneau(creneauId).subscribe({
-      next: () => {
-        const medecinId = this.medecinSelectionneId();
-        if (medecinId) this.charger(medecinId);
-      },
-      error: (err: any) => {
-        this.errorMessage.set(err.error?.message ?? 'Impossible de supprimer ce créneau.');
       },
     });
   }
