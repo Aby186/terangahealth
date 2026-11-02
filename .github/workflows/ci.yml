@@ -79,3 +79,41 @@ jobs:
 
       - name: Construire l'application
         run: npm run build -- --configuration production
+  docker:
+    name: Publier les images sur Docker Hub
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparer Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Connexion a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Image backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./terangahealth-backend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/terangahealth-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/terangahealth-backend:${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Image frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./terangahealth-frontend
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/terangahealth-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/terangahealth-frontend:${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
