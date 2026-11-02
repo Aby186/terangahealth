@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend Laravel (PostgreSQL + tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terangahealth-backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: terangahealth_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: terangahealth_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_pgsql, bcmath, zip
+          coverage: none
+
+      - name: Installer les dependances
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Preparer l'environnement
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Lancer les migrations sur PostgreSQL
+        run: php artisan migrate --force
+
+      - name: Lancer les tests
+        run: php artisan test
+
+  frontend:
+    name: Frontend Angular (build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terangahealth-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: terangahealth-frontend/package-lock.json
+
+      - name: Installer les dependances
+        run: npm ci
+
+      - name: Construire l'application
+        run: npm run build -- --configuration production
