@@ -27,8 +27,8 @@
 
       @if (!medecinIdDepuisUrl()) {
         <div class="field">
-          <label>Médecin</label>
-          <select formControlName="medecin_id" (change)="onMedecinChange()">
+          <label for="prendre-rdv-medecin">Médecin</label>
+          <select id="prendre-rdv-medecin" formControlName="medecin_id" (change)="onMedecinChange()">
             <option value="" disabled selected>Sélectionnez un médecin</option>
             @for (m of tousLesMedecins(); track m.id) {
               <option [value]="m.id">Dr {{ m.prenom }} {{ m.nom }} @if (m.service) { — {{ m.service.nom }} }</option>
@@ -38,12 +38,12 @@
       }
 
       <div class="field">
-        <label>Date souhaitée</label>
-        <input type="date" formControlName="date" (change)="onDateChange()" [disabled]="!form.value.medecin_id" />
+        <label for="prendre-rdv-date">Date souhaitée</label>
+        <input id="prendre-rdv-date" type="date" formControlName="date" (change)="onDateChange()" [disabled]="!form.value.medecin_id" />
       </div>
 
       <div class="field">
-        <label>Créneau horaire</label>
+        <label [attr.for]="'prendre-rdv-creneau-' + (creneaux()[0]?.id ?? 'default')">Créneau horaire</label>
 
         @if (loadingCreneaux()) {
           <p class="hint">Chargement des créneaux...</p>
@@ -73,7 +73,7 @@
         <div class="creneaux-grid">
           @for (creneau of creneaux(); track creneau.id) {
             <label class="creneau-option" [class.selected]="isSelected(creneau.id)">
-              <input type="radio" formControlName="creneau_id" [value]="creneau.id" />
+              <input [attr.id]="'prendre-rdv-creneau-' + creneau.id" type="radio" formControlName="creneau_id" [value]="creneau.id" />
               {{ creneau.heure_debut.substring(0, 5) }}
             </label>
           }
@@ -81,16 +81,16 @@
       </div>
 
       <div class="field">
-        <label>Motif de consultation</label>
-        <textarea formControlName="motif" rows="4" placeholder="Décrivez brièvement le motif de votre consultation (minimum 10 caractères)"></textarea>
+        <label for="prendre-rdv-motif">Motif de consultation</label>
+        <textarea id="prendre-rdv-motif" formControlName="motif" rows="4" placeholder="Décrivez brièvement le motif de votre consultation (minimum 10 caractères)"></textarea>
         @if (form.get('motif')?.invalid && form.get('motif')?.touched) {
           <p class="field-error">Le motif doit contenir au moins 10 caractères.</p>
         }
       </div>
 
       <div class="field">
-        <label>Notes additionnelles <span class="optional">(optionnel)</span></label>
-        <textarea formControlName="notes" rows="2" placeholder="Informations supplémentaires que vous souhaitez communiquer au médecin..."></textarea>
+        <label for="prendre-rdv-notes">Notes additionnelles <span class="optional">(optionnel)</span></label>
+        <textarea id="prendre-rdv-notes" formControlName="notes" rows="2" placeholder="Informations supplémentaires que vous souhaitez communiquer au médecin..."></textarea>
       </div>
 
       @if (medecin()?.service?.tarif) {

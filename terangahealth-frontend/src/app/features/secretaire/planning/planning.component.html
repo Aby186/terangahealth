@@ -13,8 +13,8 @@
   }
 
   <div class="medecin-select-row">
-    <label>Médecin</label>
-    <select [(ngModel)]="medecinSelectionneId" (ngModelChange)="onMedecinChange()">
+    <label for="secretaire-planning-medecin">Médecin</label>
+    <select id="secretaire-planning-medecin" [(ngModel)]="medecinSelectionneId" (ngModelChange)="onMedecinChange()">
       <option [ngValue]="null" disabled selected>Sélectionnez un médecin</option>
       @for (m of medecins(); track m.id) {
         <option [ngValue]="m.id">{{ nomMedecin(m) }} @if (m.service) { — {{ m.service.nom }} }</option>

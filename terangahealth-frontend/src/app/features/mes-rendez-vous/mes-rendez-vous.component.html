@@ -137,8 +137,9 @@
 
           @if (reprogrammationOuverteId() === rdv.id) {
             <div class="reprog-box">
-              <label>Nouvelle date</label>
+              <label [attr.for]="'mes-rendez-vous-nouvelle-date-' + rdv.id">Nouvelle date</label>
               <input
+                [attr.id]="'mes-rendez-vous-nouvelle-date-' + rdv.id"
                 type="date"
                 [ngModel]="nouvelleDateReprog()"
                 (ngModelChange)="nouvelleDateReprog.set($event)"

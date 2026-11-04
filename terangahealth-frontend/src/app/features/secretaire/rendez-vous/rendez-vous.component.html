@@ -14,8 +14,8 @@
 
   <div class="filters-row">
     <div class="filter-field">
-      <label>Statut</label>
-      <select [(ngModel)]="filtreStatut">
+      <label for="secretaire-rendez-vous-statut">Statut</label>
+      <select id="secretaire-rendez-vous-statut" [(ngModel)]="filtreStatut">
         <option value="tous">Tous les statuts</option>
         <option value="en_attente">En attente</option>
         <option value="confirme">Confirmé</option>
@@ -25,8 +25,8 @@
     </div>
 
     <div class="filter-field">
-      <label>Date</label>
-      <input type="date" [(ngModel)]="filtreDate" />
+      <label for="secretaire-rendez-vous-date">Date</label>
+      <input id="secretaire-rendez-vous-date" type="date" [(ngModel)]="filtreDate" />
     </div>
 
     <button class="btn-clear" (click)="effacerFiltres()">
@@ -35,10 +35,11 @@
     </button>
 
     <div class="filter-field filter-search">
-      <label>Recherche</label>
+      <label for="secretaire-rendez-vous-recherche">Recherche</label>
       <div class="search-wrapper">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
         <input
+          id="secretaire-rendez-vous-recherche"
           type="text"
           placeholder="Patient, téléphone, médecin ou référence…"
           (input)="filtreRecherche.set($any($event.target).value)"

@@ -45,7 +45,9 @@
 
       <div class="chat-input-row">
         <input
+          id="chatbot-message"
           type="text"
+          aria-label="Saisir votre message"
           [(ngModel)]="saisie"
           (keyup.enter)="envoyer()"
           [disabled]="enCours()"

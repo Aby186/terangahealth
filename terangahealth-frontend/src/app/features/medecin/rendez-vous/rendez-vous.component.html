@@ -11,8 +11,8 @@
 
   <div class="filters-row">
     <div class="filter-field">
-      <label>Statut</label>
-      <select [(ngModel)]="filtreStatut">
+      <label for="medecin-rendez-vous-statut">Statut</label>
+      <select id="medecin-rendez-vous-statut" [(ngModel)]="filtreStatut">
         <option value="tous">Tous les statuts</option>
         <option value="en_attente">En attente</option>
         <option value="confirme">Confirmé</option>
@@ -20,8 +20,8 @@
       </select>
     </div>
     <div class="filter-field">
-      <label>Date</label>
-      <input type="date" [(ngModel)]="filtreDate" />
+      <label for="medecin-rendez-vous-date">Date</label>
+      <input id="medecin-rendez-vous-date" type="date" [(ngModel)]="filtreDate" />
     </div>
     <button class="btn-clear" (click)="effacerFiltres()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" /></svg>

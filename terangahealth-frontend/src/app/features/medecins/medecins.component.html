@@ -19,7 +19,7 @@
 
   <div class="search-bar">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
-    <input type="text" placeholder="Rechercher un médecin..." [(ngModel)]="recherche" />
+    <input id="medecins-recherche" type="text" aria-label="Rechercher un médecin" placeholder="Rechercher un médecin..." [(ngModel)]="recherche" />
   </div>
 
   @if (!serviceChoisi()) {

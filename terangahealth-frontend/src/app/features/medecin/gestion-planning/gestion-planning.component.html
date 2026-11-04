@@ -14,9 +14,9 @@
 
   <div class="top-row">
     <div class="new-planning-box">
-      <label>Ajouter une journée de disponibilité</label>
+      <label for="gestion-planning-nouvelle-date">Ajouter une journée de disponibilité</label>
       <div class="new-planning-row">
-        <input type="date" [(ngModel)]="nouvelleDate" [min]="todayLocalDateString()" />
+        <input id="gestion-planning-nouvelle-date" type="date" [(ngModel)]="nouvelleDate" [min]="todayLocalDateString()" />
         <button
           class="btn-primary"
           [disabled]="!nouvelleDate() || creationEnCours()"
@@ -28,9 +28,9 @@
     </div>
 
     <div class="search-planning-box">
-      <label>Rechercher une journée</label>
+      <label for="gestion-planning-date-recherche">Rechercher une journée</label>
       <div class="search-planning-row">
-        <input type="date" [(ngModel)]="dateRecherche" />
+        <input id="gestion-planning-date-recherche" type="date" [(ngModel)]="dateRecherche" />
         <button class="btn-search" type="button" (click)="rechercherJournee()">Rechercher</button>
       </div>
     </div>
@@ -75,16 +75,16 @@
             <div class="generation-box">
               <div class="generation-row">
                 <div class="gen-field">
-                  <label>Heure de début</label>
-                  <input type="time" [(ngModel)]="heureDebutGen" />
+                  <label for="gestion-planning-heure-debut-generation-2">Heure de début</label>
+                  <input id="gestion-planning-heure-debut-generation-2" type="time" [(ngModel)]="heureDebutGen" />
                 </div>
                 <div class="gen-field">
-                  <label>Heure de fin</label>
-                  <input type="time" [(ngModel)]="heureFinGen" />
+                  <label for="gestion-planning-heure-fin-generation-2">Heure de fin</label>
+                  <input id="gestion-planning-heure-fin-generation-2" type="time" [(ngModel)]="heureFinGen" />
                 </div>
                 <div class="gen-field">
-                  <label>Durée (min)</label>
-                  <input type="number" [(ngModel)]="dureeGen" min="5" max="120" step="5" />
+                  <label for="gestion-planning-duree-generation-2">Durée (min)</label>
+                  <input id="gestion-planning-duree-generation-2" type="number" [(ngModel)]="dureeGen" min="5" max="120" step="5" />
                 </div>
               </div>
               <div class="generation-actions">
@@ -187,16 +187,16 @@
           <div class="generation-box">
             <div class="generation-row">
               <div class="gen-field">
-                <label>Heure de début</label>
-                <input type="time" [(ngModel)]="heureDebutGen" />
+                <label for="gestion-planning-heure-debut-generation-1">Heure de début</label>
+                <input id="gestion-planning-heure-debut-generation-1" type="time" [(ngModel)]="heureDebutGen" />
               </div>
               <div class="gen-field">
-                <label>Heure de fin</label>
-                <input type="time" [(ngModel)]="heureFinGen" />
+                <label for="gestion-planning-heure-fin-generation-1">Heure de fin</label>
+                <input id="gestion-planning-heure-fin-generation-1" type="time" [(ngModel)]="heureFinGen" />
               </div>
               <div class="gen-field">
-                <label>Durée (min)</label>
-                <input type="number" [(ngModel)]="dureeGen" min="5" max="120" step="5" />
+                <label for="gestion-planning-duree-generation-1">Durée (min)</label>
+                <input id="gestion-planning-duree-generation-1" type="number" [(ngModel)]="dureeGen" min="5" max="120" step="5" />
               </div>
             </div>
             <div class="generation-actions">
