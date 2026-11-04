@@ -167,7 +167,8 @@
         <div class="dialogue" role="dialog" aria-modal="true">
           <h4>Confirmer la fermeture</h4>
           <p>Veuillez saisir votre mot de passe pour confirmer la fermeture de votre compte.</p>
-          <input type="password" placeholder="Mot de passe" [value]="motDePasse()" (input)="saisirMotDePasse($event)" (keyup.enter)="confirmerSuppression()" />
+          <label for="mdp-fermeture" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Mot de passe</label>
+          <input id="mdp-fermeture" type="password" placeholder="Mot de passe" [value]="motDePasse()" (input)="saisirMotDePasse($event)" (keyup.enter)="confirmerSuppression()" />
           @if (erreur()) {
             <div class="error-box small">{{ erreur() }}</div>
           }

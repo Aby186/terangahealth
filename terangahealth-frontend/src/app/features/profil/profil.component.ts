@@ -109,7 +109,7 @@ export class ProfilComponent {
 
     if (!valeurs.email.trim()) {
       erreurs['email'] = ['L’e-mail est requis.'];
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valeurs.email.trim())) {
+    } else if (!/^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$/.test(valeurs.email.trim())) {
       erreurs['email'] = ['Saisissez une adresse e-mail valide.'];
     }
 
