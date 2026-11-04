@@ -89,8 +89,8 @@ class PaiementController extends Controller
         $invoice->setTotalAmount($service->tarif);
         $invoice->setDescription('Consultation ' . $service->nom . ' - TerangaHealth');
         $invoice->addChannels(['card', 'wave-senegal', 'orange-money-senegal']);
-        $invoice->setReturnUrl('http://localhost:4200/paiement/retour?paiement_id=' . $paiement->id);
-        $invoice->setCancelUrl('http://localhost:4200/prendre-rdv');
+        $invoice->setReturnUrl(rtrim(config('app.frontend_url'), '/') . '/paiement/retour?paiement_id=' . $paiement->id);
+        $invoice->setCancelUrl(rtrim(config('app.frontend_url'), '/') . '/prendre-rdv');
 
         $invoice->addCustomData('paiement_id', $paiement->id);
         $invoice->addCustomData('patient_id', $request->user()->id);
