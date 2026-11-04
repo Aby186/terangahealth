@@ -3,6 +3,7 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
   SimpleChanges,
   ViewChild,
@@ -19,12 +20,12 @@ import { PaiementHistorique } from '../../core/paiement.service';
   templateUrl: './facture.component.html',
   styleUrl: './facture.component.css',
 })
-export class FactureComponent {
+export class FactureComponent implements OnChanges {
   private authService = inject(AuthService);
 
   @Input() paiement: PaiementHistorique | null = null;
   @Input() open = false;
-  @Output() close = new EventEmitter<void>();
+  @Output() fermer = new EventEmitter<void>();
 
   @ViewChild('dialogRef') dialogRef?: ElementRef<HTMLDialogElement>;
 
@@ -103,7 +104,7 @@ export class FactureComponent {
     if (dialog && dialog.open) {
       dialog.close();
     }
-    this.close.emit();
+    this.fermer.emit();
   }
 
   imprimer(): void {
