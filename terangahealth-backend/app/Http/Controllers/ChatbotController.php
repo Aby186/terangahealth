@@ -112,7 +112,7 @@ PROMPT;
             return null;
         }
 
-        $texte = trim(preg_replace('/^```(?:json)?|```$/m', '', trim($texte)));
+        $texte = trim(preg_replace('/(?:^```(?:json)?)|(?:```$)/m', '', trim($texte)));
         $donnees = json_decode($texte, true);
 
         if (! is_array($donnees) || ! isset($donnees['reponse'])) {

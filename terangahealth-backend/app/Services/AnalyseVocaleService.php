@@ -68,7 +68,7 @@ PROMPT;
             return null;
         }
 
-        $brut = trim(preg_replace('/^```(?:json)?|```$/m', '', trim($brut)));
+        $brut = trim(preg_replace('/(?:^```(?:json)?)|(?:```$)/m', '', trim($brut)));
         $donnees = json_decode($brut, true);
 
         if (! is_array($donnees)) {

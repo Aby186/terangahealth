@@ -60,7 +60,7 @@ async function convertirEnWav(blob: Blob): Promise<Blob> {
   try {
     audio = await contexte.decodeAudioData(donnees);
   } finally {
-    contexte.close();
+    contexte.close().catch(() => {});
   }
   const frequence = 16000;
   const hors = new OfflineAudioContext(1, Math.max(1, Math.ceil(audio.duration * frequence)), frequence);

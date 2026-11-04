@@ -26,34 +26,34 @@
       <form [formGroup]="form" (ngSubmit)="soumettreFormulaire()">
         <div class="form-row">
           <div class="field">
-            <label>Prénom</label>
-            <input type="text" formControlName="prenom" />
+            <label for="champ-utilisateurs-1">Prénom</label>
+            <input id="champ-utilisateurs-1" type="text" formControlName="prenom" />
           </div>
           <div class="field">
-            <label>Nom</label>
-            <input type="text" formControlName="nom" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="field">
-            <label>Email</label>
-            <input type="email" formControlName="email" autocomplete="off" />
-          </div>
-          <div class="field">
-            <label>Téléphone</label>
-            <input type="tel" formControlName="telephone" />
+            <label for="champ-utilisateurs-2">Nom</label>
+            <input id="champ-utilisateurs-2" type="text" formControlName="nom" />
           </div>
         </div>
 
         <div class="form-row">
           <div class="field">
-            <label>Mot de passe{{ utilisateurEnEditionId() ? ' (laisser vide pour ne pas changer)' : '' }}</label>
-            <input type="password" formControlName="password" autocomplete="new-password" />
+            <label for="champ-utilisateurs-3">Email</label>
+            <input id="champ-utilisateurs-3" type="email" formControlName="email" autocomplete="off" />
           </div>
           <div class="field">
-            <label>Rôle</label>
-            <select formControlName="role">
+            <label for="champ-utilisateurs-4">Téléphone</label>
+            <input id="champ-utilisateurs-4" type="tel" formControlName="telephone" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="champ-utilisateurs-5">Mot de passe{{ utilisateurEnEditionId() ? ' (laisser vide pour ne pas changer)' : '' }}</label>
+            <input id="champ-utilisateurs-5" type="password" formControlName="password" autocomplete="new-password" />
+          </div>
+          <div class="field">
+            <label for="champ-utilisateurs-6">Rôle</label>
+            <select id="champ-utilisateurs-6" formControlName="role">
               <option value="medecin">Médecin</option>
               <option value="secretaire">Secrétaire</option>
               <option value="administrateur">Administrateur</option>
@@ -64,8 +64,8 @@
         @if (form.value.role === 'medecin') {
           <div class="form-row">
             <div class="field">
-              <label>Service</label>
-              <select formControlName="service_id">
+              <label for="champ-utilisateurs-7">Service</label>
+              <select id="champ-utilisateurs-7" formControlName="service_id">
                 <option value="" disabled selected>Sélectionnez</option>
                 @for (s of services(); track s.id) {
                   <option [value]="s.id">{{ s.nom }}</option>
@@ -73,13 +73,13 @@
               </select>
             </div>
             <div class="field">
-              <label>Expérience (ans)</label>
-              <input type="number" formControlName="experience" min="0" />
+              <label for="champ-utilisateurs-8">Expérience (ans)</label>
+              <input id="champ-utilisateurs-8" type="number" formControlName="experience" min="0" />
             </div>
           </div>
           <div class="field">
-            <label>Langues parlées</label>
-            <input type="text" formControlName="langues_parlees" placeholder="Français, Wolof..." />
+            <label for="champ-utilisateurs-9">Langues parlées</label>
+            <input id="champ-utilisateurs-9" type="text" formControlName="langues_parlees" placeholder="Français, Wolof..." />
           </div>
         }
 
